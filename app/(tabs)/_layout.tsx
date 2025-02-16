@@ -4,6 +4,7 @@ import { Platform } from "react-native";
 
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import TabBarBackground from "@/components/ui/TabBarBackground";
+import { HapticTab } from "@/components/ui/HapticTab";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
