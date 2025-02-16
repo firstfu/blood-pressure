@@ -7,7 +7,6 @@
 - Expo SDK Latest
 - React Native
 - TypeScript
-- NativeWind v4 (UI 框架)
 - React Query（數據獲取和緩存）
 - Zustand（狀態管理）
 - React Native Charts（數據可視化）
@@ -147,7 +146,6 @@ components/
 ### 樣式配置
 
 ```
-tailwind.config.js    // NativeWind 配置
 global.css           // 全局樣式
 theme/
   ├── colors.ts      // 顏色主題
@@ -156,7 +154,6 @@ theme/
 
 ### UI 開發規範
 
-1. 使用 NativeWind 的 className API 進行樣式開發
 2. 對於複雜組件使用 `cssInterop()` 或 `remapProps()` 進行樣式映射
 3. 支持響應式設計和暗黑模式
 4. 確保跨平台一致性
