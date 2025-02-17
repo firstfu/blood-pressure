@@ -14,7 +14,7 @@ export default function HomeScreen() {
 
   const headerHeight = scrollY.interpolate({
     inputRange: [0, 100],
-    outputRange: [200, 120],
+    outputRange: [Platform.OS === "android" ? 180 : 140, Platform.OS === "android" ? 120 : 100],
     extrapolate: "clamp",
   });
 
@@ -27,28 +27,36 @@ export default function HomeScreen() {
   const handleScroll = Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: false });
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* 動態頂部區域 */}
-      <Animated.View style={[styles.headerContainer, { height: headerHeight }]}>
+    <View style={styles.container}>
+      {/* 固定頂部區域 */}
+      <View style={styles.headerContainer}>
         <LinearGradient colors={["#2d87ff", "#1a6cd4"]} start={[0, 0]} end={[1, 1]} style={styles.headerGradient}>
-          <View style={styles.header}>
-            <View>
-              <Text style={styles.welcomeText}>今日血壓追蹤</Text>
-              <Text style={styles.dateText}>{new Date().toLocaleDateString("zh-TW")}</Text>
+          <SafeAreaView>
+            <View style={styles.header}>
+              <View style={styles.headerContent}>
+                <Text style={styles.welcomeText}>今日血壓追蹤</Text>
+                <Text style={styles.dateText}>
+                  {new Date().toLocaleDateString("zh-TW", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                  })}
+                </Text>
+              </View>
+              <View style={styles.headerButtons}>
+                <Pressable style={styles.iconButton}>
+                  <FontAwesome name="search" size={18} color="#fff" />
+                </Pressable>
+                <Pressable style={styles.iconButton}>
+                  <FontAwesome name="bell-o" size={18} color="#fff" />
+                </Pressable>
+              </View>
             </View>
-            <View style={styles.headerButtons}>
-              <Pressable style={styles.iconButton}>
-                <FontAwesome name="search" size={20} color="#fff" />
-              </Pressable>
-              <Pressable style={styles.iconButton}>
-                <FontAwesome name="bell-o" size={20} color="#fff" />
-              </Pressable>
-            </View>
-          </View>
+          </SafeAreaView>
         </LinearGradient>
-      </Animated.View>
+      </View>
 
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false} onScroll={handleScroll} scrollEventThrottle={16}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent} showsVerticalScrollIndicator={false} onScroll={handleScroll} scrollEventThrottle={16}>
         {/* 主要內容區 */}
         <View style={styles.mainContent}>
           {/* 快速記錄卡片 */}
@@ -142,7 +150,7 @@ export default function HomeScreen() {
           </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -152,54 +160,59 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f7fa",
   },
   headerContainer: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 1000,
+    width: "100%",
+    backgroundColor: "#2d87ff",
   },
   headerGradient: {
-    flex: 1,
-    height: "100%",
-  },
-  scrollView: {
-    flex: 1,
+    width: "100%",
   },
   header: {
-    padding: 20,
-    paddingTop: Platform.OS === "android" ? 40 : 20,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    paddingHorizontal: 16,
+    paddingTop: Platform.OS === "android" ? 8 : 0,
+    paddingBottom: 12,
+    height: Platform.OS === "android" ? 80 : 44,
+  },
+  headerContent: {
+    flex: 1,
+  },
+  welcomeText: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: "#fff",
+    marginBottom: 2,
+  },
+  dateText: {
+    fontSize: 13,
+    color: "rgba(255,255,255,0.8)",
   },
   headerButtons: {
     flexDirection: "row",
-    gap: 12,
+    gap: 8,
   },
   iconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: "rgba(255,255,255,0.2)",
     alignItems: "center",
     justifyContent: "center",
   },
-  welcomeText: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: "#fff",
+  scrollView: {
+    flex: 1,
   },
-  dateText: {
-    fontSize: 15,
-    color: "rgba(255,255,255,0.8)",
-    marginTop: 4,
+  scrollViewContent: {
+    flexGrow: 1,
   },
   mainContent: {
-    marginTop: 180,
+    flex: 1,
+    backgroundColor: "#f5f7fa",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    backgroundColor: "#f5f7fa",
-    paddingTop: 20,
+    marginTop: -24,
+    paddingTop: 24,
     paddingBottom: 40,
   },
   quickRecordCard: {
