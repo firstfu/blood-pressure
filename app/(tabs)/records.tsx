@@ -1,57 +1,177 @@
-import { StyleSheet, View, Text, SafeAreaView, ScrollView, Pressable, Platform } from "react-native";
-import { FontAwesome } from "@expo/vector-icons";
+import { StyleSheet, View, Text, SafeAreaView, ScrollView, Pressable, Platform, Alert, Modal, TextInput } from "react-native";
+import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { MotiView } from "moti";
 import { useState } from "react";
 
+interface BloodPressureRecord {
+  id: string;
+  systolic: number;
+  diastolic: number;
+  heartRate: number;
+  date: string;
+  time: string;
+  note?: string;
+}
+
+interface EditModalProps {
+  visible: boolean;
+  record: BloodPressureRecord | null;
+  onClose: () => void;
+  onSave: (record: BloodPressureRecord) => void;
+}
+
+function EditModal({ visible, record, onClose, onSave }: EditModalProps) {
+  const [editedRecord, setEditedRecord] = useState<BloodPressureRecord | null>(record);
+
+  const handleSave = () => {
+    if (editedRecord) {
+      onSave(editedRecord);
+      onClose();
+    }
+  };
+
+  if (!editedRecord) return null;
+
+  return (
+    <Modal visible={visible} animationType="slide" transparent>
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>編輯記錄</Text>
+            <Pressable onPress={onClose} style={styles.modalCloseButton}>
+              <FontAwesome5 name="times" size={20} color="#8e8e93" />
+            </Pressable>
+          </View>
+
+          <ScrollView style={styles.modalBody}>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>收縮壓 (mmHg)</Text>
+              <TextInput
+                style={styles.input}
+                value={String(editedRecord.systolic)}
+                onChangeText={value => setEditedRecord({ ...editedRecord, systolic: parseInt(value) || 0 })}
+                keyboardType="number-pad"
+                maxLength={3}
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>舒張壓 (mmHg)</Text>
+              <TextInput
+                style={styles.input}
+                value={String(editedRecord.diastolic)}
+                onChangeText={value => setEditedRecord({ ...editedRecord, diastolic: parseInt(value) || 0 })}
+                keyboardType="number-pad"
+                maxLength={3}
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>心率 (BPM)</Text>
+              <TextInput
+                style={styles.input}
+                value={String(editedRecord.heartRate)}
+                onChangeText={value => setEditedRecord({ ...editedRecord, heartRate: parseInt(value) || 0 })}
+                keyboardType="number-pad"
+                maxLength={3}
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>備註</Text>
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                value={editedRecord.note || ""}
+                onChangeText={value => setEditedRecord({ ...editedRecord, note: value })}
+                multiline
+                numberOfLines={4}
+                textAlignVertical="top"
+              />
+            </View>
+          </ScrollView>
+
+          <View style={styles.modalFooter}>
+            <Pressable style={[styles.modalButton, styles.modalCancelButton]} onPress={onClose}>
+              <Text style={styles.modalButtonText}>取消</Text>
+            </Pressable>
+            <Pressable style={[styles.modalButton, styles.modalSaveButton]} onPress={handleSave}>
+              <Text style={[styles.modalButtonText, styles.modalSaveButtonText]}>保存</Text>
+            </Pressable>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
 export default function RecordsScreen() {
-  // 模擬數據
-  const [records] = useState([
+  const [records, setRecords] = useState<BloodPressureRecord[]>([
     {
       id: "1",
-      date: "2024-02-16",
-      time: "08:30",
-      systolic: 128,
-      diastolic: 82,
+      systolic: 120,
+      diastolic: 80,
       heartRate: 75,
-      status: "warning",
+      date: "2024-03-20",
+      time: "09:30",
       note: "早晨量測",
-      tags: ["飯前", "運動後"],
     },
     {
       id: "2",
-      date: "2024-02-16",
-      time: "13:45",
       systolic: 118,
       diastolic: 78,
       heartRate: 72,
-      status: "normal",
-      note: "午餐後量測",
-      tags: ["飯後"],
+      date: "2024-03-20",
+      time: "21:30",
+      note: "睡前量測",
     },
     {
       id: "3",
-      date: "2024-02-15",
-      time: "20:15",
-      systolic: 122,
-      diastolic: 80,
-      heartRate: 68,
-      status: "normal",
-      note: "睡前量測",
-      tags: ["飯後", "服藥後"],
+      systolic: 125,
+      diastolic: 82,
+      heartRate: 78,
+      date: "2024-03-19",
+      time: "09:30",
     },
   ]);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "normal":
-        return "#34c759";
-      case "warning":
-        return "#ffd60a";
-      case "danger":
-        return "#ff3b30";
-      default:
-        return "#8e8e93";
-    }
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState<BloodPressureRecord | null>(null);
+
+  const handleEdit = (record: BloodPressureRecord) => {
+    setSelectedRecord(record);
+    setEditModalVisible(true);
+  };
+
+  const handleSaveEdit = (editedRecord: BloodPressureRecord) => {
+    setRecords(prev => prev.map(record => (record.id === editedRecord.id ? editedRecord : record)));
+  };
+
+  const handleDelete = (id: string) => {
+    Alert.alert(
+      "刪除記錄",
+      "確定要刪除這筆記錄嗎？",
+      [
+        {
+          text: "取消",
+          style: "cancel",
+        },
+        {
+          text: "刪除",
+          style: "destructive",
+          onPress: () => {
+            setRecords(prev => prev.filter(record => record.id !== id));
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
+  const getStatusColor = (systolic: number, diastolic: number) => {
+    if (systolic >= 140 || diastolic >= 90) return "#ff3b30";
+    if (systolic >= 130 || diastolic >= 85) return "#ffd60a";
+    return "#34c759";
   };
 
   const formatDate = (date: string) => {
@@ -108,61 +228,73 @@ export default function RecordsScreen() {
 
           {/* 記錄列表 */}
           <View style={styles.recordsList}>
-            {records.map(record => (
-              <Pressable key={record.id} style={styles.recordCard}>
-                <View style={styles.recordHeader}>
-                  <View style={styles.recordDateContainer}>
-                    <Text style={styles.recordDate}>{formatDate(record.date)}</Text>
-                    <Text style={styles.recordTime}>{record.time}</Text>
-                  </View>
-                  <View style={[styles.statusBadge, { backgroundColor: getStatusColor(record.status) }]}>
-                    <Text style={styles.statusText}>{record.status === "normal" ? "正常" : "偏高"}</Text>
-                  </View>
-                </View>
-                <View style={styles.recordContent}>
-                  <View style={styles.recordItem}>
-                    <Text style={styles.recordLabel}>收縮壓</Text>
-                    <Text style={styles.recordValue}>{record.systolic}</Text>
-                    <Text style={styles.recordUnit}>mmHg</Text>
-                  </View>
-                  <View style={styles.recordDivider} />
-                  <View style={styles.recordItem}>
-                    <Text style={styles.recordLabel}>舒張壓</Text>
-                    <Text style={styles.recordValue}>{record.diastolic}</Text>
-                    <Text style={styles.recordUnit}>mmHg</Text>
-                  </View>
-                  <View style={styles.recordDivider} />
-                  <View style={styles.recordItem}>
-                    <Text style={styles.recordLabel}>心率</Text>
-                    <Text style={styles.recordValue}>{record.heartRate}</Text>
-                    <Text style={styles.recordUnit}>BPM</Text>
-                  </View>
-                </View>
-                {record.tags.length > 0 && (
-                  <View style={styles.tagsContainer}>
-                    {record.tags.map((tag, index) => (
-                      <View key={index} style={styles.tag}>
-                        <Text style={styles.tagText}>{tag}</Text>
+            {records.length === 0 ? (
+              <View style={styles.emptyState}>
+                <FontAwesome5 name="notes-medical" size={48} color="#8e8e93" />
+                <Text style={styles.emptyStateText}>尚無記錄</Text>
+                <Text style={styles.emptyStateSubtext}>點擊右下角按鈕新增記錄</Text>
+              </View>
+            ) : (
+              records.map((record, index) => (
+                <Pressable key={record.id} style={({ pressed }) => [styles.recordCardContainer, pressed && styles.recordCardPressed]} onPress={() => handleEdit(record)}>
+                  <MotiView
+                    style={styles.recordCard}
+                    from={{ opacity: 0, translateY: 20 }}
+                    animate={{ opacity: 1, translateY: 0 }}
+                    transition={{ type: "timing", duration: 500, delay: index * 100 }}
+                  >
+                    <View style={styles.recordHeader}>
+                      <View style={styles.recordDateContainer}>
+                        <FontAwesome5 name="calendar-alt" size={14} color="#8e8e93" />
+                        <Text style={styles.recordDate}>{formatDate(record.date)}</Text>
+                        <Text style={styles.recordTime}>{record.time}</Text>
                       </View>
-                    ))}
-                  </View>
-                )}
-                {record.note && <Text style={styles.noteText}>{record.note}</Text>}
-                <View style={styles.recordActions}>
-                  <Pressable style={styles.actionButton}>
-                    <FontAwesome name="pencil" size={16} color="#8e8e93" />
-                    <Text style={styles.actionButtonText}>編輯</Text>
-                  </Pressable>
-                  <Pressable style={[styles.actionButton, styles.actionButtonDanger]}>
-                    <FontAwesome name="trash" size={16} color="#ff3b30" />
-                    <Text style={[styles.actionButtonText, styles.actionButtonTextDanger]}>刪除</Text>
-                  </Pressable>
-                </View>
-              </Pressable>
-            ))}
+                      <View style={styles.actionButtons}>
+                        <Pressable style={styles.actionButton} onPress={() => handleEdit(record)}>
+                          <FontAwesome5 name="edit" size={14} color="#7F3DFF" />
+                        </Pressable>
+                        <Pressable style={styles.actionButton} onPress={() => handleDelete(record.id)}>
+                          <FontAwesome5 name="trash-alt" size={14} color="#ff3b30" />
+                        </Pressable>
+                      </View>
+                    </View>
+                    <View style={styles.recordContent}>
+                      <View style={styles.recordItem}>
+                        <Text style={styles.recordLabel}>收縮壓</Text>
+                        <Text style={[styles.recordValue, { color: getStatusColor(record.systolic, record.diastolic) }]}>{record.systolic}</Text>
+                        <Text style={styles.recordUnit}>mmHg</Text>
+                      </View>
+                      <View style={styles.recordDivider} />
+                      <View style={styles.recordItem}>
+                        <Text style={styles.recordLabel}>舒張壓</Text>
+                        <Text style={[styles.recordValue, { color: getStatusColor(record.systolic, record.diastolic) }]}>{record.diastolic}</Text>
+                        <Text style={styles.recordUnit}>mmHg</Text>
+                      </View>
+                      <View style={styles.recordDivider} />
+                      <View style={styles.recordItem}>
+                        <Text style={styles.recordLabel}>心率</Text>
+                        <Text style={styles.recordValue}>{record.heartRate}</Text>
+                        <Text style={styles.recordUnit}>BPM</Text>
+                      </View>
+                    </View>
+                    {record.note && <Text style={styles.noteText}>{record.note}</Text>}
+                  </MotiView>
+                </Pressable>
+              ))
+            )}
           </View>
         </View>
       </ScrollView>
+
+      <EditModal
+        visible={editModalVisible}
+        record={selectedRecord}
+        onClose={() => {
+          setEditModalVisible(false);
+          setSelectedRecord(null);
+        }}
+        onSave={handleSaveEdit}
+      />
 
       {/* 新增記錄按鈕 */}
       <Pressable style={styles.fab}>
@@ -225,6 +357,7 @@ const styles = StyleSheet.create({
   },
   scrollViewContent: {
     flexGrow: 1,
+    paddingBottom: Platform.OS === "ios" ? 120 : 100,
   },
   mainContent: {
     flex: 1,
@@ -261,13 +394,18 @@ const styles = StyleSheet.create({
   },
   recordsList: {
     paddingHorizontal: 16,
-    paddingBottom: 100,
+    paddingBottom: Platform.OS === "ios" ? 120 : 100,
+  },
+  recordCardContainer: {
+    marginBottom: 12,
+  },
+  recordCardPressed: {
+    opacity: 0.7,
   },
   recordCard: {
     backgroundColor: "#fff",
     borderRadius: 16,
     padding: 16,
-    marginBottom: 12,
     ...Platform.select({
       ios: {
         shadowColor: "#000",
@@ -300,15 +438,17 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#8e8e93",
   },
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
+  actionButtons: {
+    flexDirection: "row",
+    gap: 12,
   },
-  statusText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#fff",
+  actionButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#f5f7fa",
+    alignItems: "center",
+    justifyContent: "center",
   },
   recordContent: {
     flexDirection: "row",
@@ -340,56 +480,15 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#8e8e93",
   },
-  tagsContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    marginBottom: 12,
-  },
-  tag: {
-    backgroundColor: "rgba(45,135,255,0.1)",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  tagText: {
-    fontSize: 12,
-    color: "#2d87ff",
-  },
   noteText: {
     fontSize: 13,
     color: "#8e8e93",
     marginBottom: 12,
   },
-  recordActions: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    gap: 12,
-  },
-  actionButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-    backgroundColor: "rgba(142,142,147,0.1)",
-  },
-  actionButtonDanger: {
-    backgroundColor: "rgba(255,59,48,0.1)",
-  },
-  actionButtonText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#8e8e93",
-  },
-  actionButtonTextDanger: {
-    color: "#ff3b30",
-  },
   fab: {
     position: "absolute",
     right: 16,
-    bottom: 16 + (Platform.OS === "ios" ? 34 : 16),
+    bottom: Platform.OS === "ios" ? 100 : 80,
     width: 56,
     height: 56,
     borderRadius: 28,
@@ -411,5 +510,104 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     alignItems: "center",
     justifyContent: "center",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: 20,
+    maxHeight: "90%",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: "#1c1c1e",
+  },
+  modalCloseButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#f5f7fa",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalBody: {
+    paddingHorizontal: 20,
+  },
+  inputGroup: {
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#1c1c1e",
+    marginBottom: 8,
+  },
+  input: {
+    height: 48,
+    backgroundColor: "#f5f7fa",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    color: "#1c1c1e",
+  },
+  textArea: {
+    height: 100,
+    paddingTop: 12,
+    paddingBottom: 12,
+  },
+  modalFooter: {
+    flexDirection: "row",
+    padding: 20,
+    gap: 12,
+  },
+  modalButton: {
+    flex: 1,
+    height: 48,
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalCancelButton: {
+    backgroundColor: "#f5f7fa",
+  },
+  modalSaveButton: {
+    backgroundColor: "#2d87ff",
+  },
+  modalButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1c1c1e",
+  },
+  modalSaveButtonText: {
+    color: "#fff",
+  },
+  emptyState: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 60,
+  },
+  emptyStateText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#8e8e93",
+    marginTop: 16,
+  },
+  emptyStateSubtext: {
+    fontSize: 14,
+    color: "#8e8e93",
+    marginTop: 8,
   },
 });

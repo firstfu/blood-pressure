@@ -6,6 +6,7 @@ import { LineChart, BarChart, PieChart } from "react-native-chart-kit";
 import * as Calendar from "expo-calendar";
 import * as FileSystem from "expo-file-system";
 import ViewShot, { captureRef } from "react-native-view-shot";
+import { MotiView } from "moti";
 
 type DateRange = "week" | "month" | "year" | "custom";
 type ChartType = "line" | "bar" | "pie";
@@ -509,149 +510,46 @@ export default function StatisticsScreen() {
 
   return (
     <View style={styles.container}>
-      {/* 頂部區域 */}
-      <View style={styles.headerContainer}>
-        <LinearGradient colors={["#2d87ff", "#1a6cd4"]} start={[0, 0]} end={[1, 1]} style={styles.headerGradient}>
-          <SafeAreaView>
-            <View style={styles.header}>
-              <View style={styles.headerContent}>
-                <Text style={styles.headerTitle}>數據統計</Text>
-                <Text style={styles.headerSubtitle}>
-                  {dateRange === "custom"
-                    ? `${selectedStartDate.toLocaleDateString()} - ${selectedEndDate.toLocaleDateString()}`
-                    : `本${dateRange === "week" ? "週" : dateRange === "month" ? "月" : "年"}記錄 ${chartData.stats.weeklyRecords} 次`}
-                </Text>
-              </View>
-              <View style={styles.headerButtons}>
-                <Pressable style={styles.iconButton} onPress={handleCalendarPress}>
-                  <FontAwesome name="calendar" size={18} color="#fff" />
-                </Pressable>
-                <Pressable style={styles.iconButton} onPress={handleShare}>
-                  <FontAwesome name="share" size={18} color="#fff" />
-                </Pressable>
-              </View>
-            </View>
-          </SafeAreaView>
-        </LinearGradient>
-      </View>
+      <LinearGradient colors={["#7F3DFF", "#5D5FEF"]} style={styles.header}>
+        <Text style={styles.headerTitle}>數據統計</Text>
+      </LinearGradient>
 
-      <ViewShot ref={viewShotRef} options={{ format: "png", quality: 0.8 }}>
-        <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent} showsVerticalScrollIndicator={false}>
-          {/* 主要內容區 */}
-          <View style={styles.mainContent}>
-            {/* 趨勢分析卡片 */}
-            <View style={styles.card}>
-              <View style={styles.cardHeader}>
-                <View style={styles.cardTitleContainer}>
-                  <View style={styles.cardTitleIcon}>
-                    <FontAwesome name="line-chart" size={16} color="#2d87ff" />
-                  </View>
-                  <Text style={styles.cardTitle}>趨勢分析</Text>
-                </View>
-                <Pressable style={styles.moreButton} onPress={handleChartOptions}>
-                  <FontAwesome name="ellipsis-h" size={20} color="#8e8e93" />
-                </Pressable>
-              </View>
-              <View style={styles.chartWrapper}>
-                {renderChart()}
-                <View style={styles.chartLegend}>
-                  <View style={styles.legendItem}>
-                    <View style={[styles.legendColor, { backgroundColor: "#2d87ff" }]} />
-                    <Text style={styles.legendText}>收縮壓</Text>
-                  </View>
-                  <View style={styles.legendItem}>
-                    <View style={[styles.legendColor, { backgroundColor: "#34c759" }]} />
-                    <Text style={styles.legendText}>舒張壓</Text>
-                  </View>
-                </View>
-              </View>
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        <MotiView style={styles.card} from={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: "timing", duration: 500 }}>
+          <Text style={styles.cardTitle}>本月概覽</Text>
+          <View style={styles.statsGrid}>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>120/80</Text>
+              <Text style={styles.statLabel}>平均血壓</Text>
             </View>
-
-            {/* 數據報告卡片 */}
-            <View style={styles.card}>
-              <View style={styles.cardHeader}>
-                <View style={styles.cardTitleContainer}>
-                  <View style={styles.cardTitleIcon}>
-                    <FontAwesome name="file-text-o" size={16} color="#2d87ff" />
-                  </View>
-                  <Text style={styles.cardTitle}>數據報告</Text>
-                </View>
-              </View>
-              <View style={styles.reportContainer}>
-                <View style={styles.reportItem}>
-                  <Text style={styles.reportLabel}>平均收縮壓</Text>
-                  <View style={styles.reportDataContainer}>
-                    <Text style={[styles.reportValue, { color: getStatusColor(chartData.stats.systolic.status) }]}>{chartData.stats.systolic.avg}</Text>
-                    <FontAwesome
-                      name={getTrendIcon(chartData.stats.systolic.trend)}
-                      size={12}
-                      color={getStatusColor(chartData.stats.systolic.status)}
-                      style={styles.trendIconStyle}
-                    />
-                  </View>
-                  <Text style={styles.reportUnit}>mmHg</Text>
-                </View>
-                <View style={styles.reportDivider} />
-                <View style={styles.reportItem}>
-                  <Text style={styles.reportLabel}>平均舒張壓</Text>
-                  <View style={styles.reportDataContainer}>
-                    <Text style={[styles.reportValue, { color: getStatusColor(chartData.stats.diastolic.status) }]}>{chartData.stats.diastolic.avg}</Text>
-                    <FontAwesome
-                      name={getTrendIcon(chartData.stats.diastolic.trend)}
-                      size={12}
-                      color={getStatusColor(chartData.stats.diastolic.status)}
-                      style={styles.trendIconStyle}
-                    />
-                  </View>
-                  <Text style={styles.reportUnit}>mmHg</Text>
-                </View>
-                <View style={styles.reportDivider} />
-                <View style={styles.reportItem}>
-                  <Text style={styles.reportLabel}>平均心率</Text>
-                  <View style={styles.reportDataContainer}>
-                    <Text style={[styles.reportValue, { color: getStatusColor(chartData.stats.heartRate.status) }]}>{chartData.stats.heartRate.avg}</Text>
-                    <FontAwesome
-                      name={getTrendIcon(chartData.stats.heartRate.trend)}
-                      size={12}
-                      color={getStatusColor(chartData.stats.heartRate.status)}
-                      style={styles.trendIconStyle}
-                    />
-                  </View>
-                  <Text style={styles.reportUnit}>BPM</Text>
-                </View>
-              </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>72</Text>
+              <Text style={styles.statLabel}>平均心率</Text>
             </View>
-
-            {/* 導出選項卡片 */}
-            <View style={styles.card}>
-              <View style={styles.cardHeader}>
-                <View style={styles.cardTitleContainer}>
-                  <View style={styles.cardTitleIcon}>
-                    <FontAwesome name="download" size={16} color="#2d87ff" />
-                  </View>
-                  <Text style={styles.cardTitle}>導出選項</Text>
-                </View>
-              </View>
-              <View style={styles.exportContainer}>
-                <Pressable style={styles.exportButton} onPress={handleExportPDF}>
-                  <FontAwesome name="file-pdf-o" size={24} color="#ff3b30" />
-                  <View style={styles.exportTextContainer}>
-                    <Text style={styles.exportButtonText}>導出 PDF 報告</Text>
-                    <Text style={styles.exportButtonSubtext}>上次更新：{chartData.stats.lastUpdate}</Text>
-                  </View>
-                </Pressable>
-                <Pressable style={styles.exportButton} onPress={handleExportExcel}>
-                  <FontAwesome name="file-excel-o" size={24} color="#34c759" />
-                  <View style={styles.exportTextContainer}>
-                    <Text style={styles.exportButtonText}>導出 Excel 表格</Text>
-                    <Text style={styles.exportButtonSubtext}>包含詳細數據記錄</Text>
-                  </View>
-                </Pressable>
-              </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>28</Text>
+              <Text style={styles.statLabel}>測量次數</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>93%</Text>
+              <Text style={styles.statLabel}>完成率</Text>
             </View>
           </View>
-        </ScrollView>
-      </ViewShot>
+        </MotiView>
+
+        <MotiView
+          style={[styles.card, styles.chartCard]}
+          from={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ type: "timing", duration: 500, delay: 200 }}
+        >
+          <Text style={styles.cardTitle}>趨勢圖</Text>
+          <View style={styles.chartPlaceholder}>
+            <Text style={styles.placeholderText}>圖表區域</Text>
+            <Text style={styles.placeholderSubtext}>即將推出</Text>
+          </View>
+        </MotiView>
+      </ScrollView>
     </View>
   );
 }
@@ -661,196 +559,82 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f5f7fa",
   },
-  headerContainer: {
-    width: "100%",
-    backgroundColor: "#2d87ff",
-  },
-  headerGradient: {
-    width: "100%",
-  },
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    paddingTop: Platform.OS === "ios" ? 60 : 40,
+    paddingBottom: 20,
     paddingHorizontal: 16,
-    paddingTop: Platform.OS === "android" ? 8 : 0,
-    paddingBottom: 12,
-    height: Platform.OS === "android" ? 80 : 44,
-  },
-  headerContent: {
-    flex: 1,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: "600",
+    fontSize: 28,
+    fontWeight: "700",
     color: "#fff",
-    marginBottom: 2,
   },
-  headerSubtitle: {
-    fontSize: 13,
-    color: "rgba(255,255,255,0.8)",
-  },
-  headerButtons: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  iconButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  scrollView: {
+  content: {
     flex: 1,
-  },
-  scrollViewContent: {
-    flexGrow: 1,
-  },
-  mainContent: {
-    flex: 1,
-    backgroundColor: "#f5f7fa",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    marginTop: -24,
-    paddingTop: 24,
-    paddingBottom: 40,
+    padding: 16,
   },
   card: {
     backgroundColor: "#fff",
-    margin: 16,
+    borderRadius: 24,
     padding: 20,
-    borderRadius: 16,
+    marginBottom: 16,
     ...Platform.select({
       ios: {
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: { width: 0, height: 8 },
         shadowOpacity: 0.1,
-        shadowRadius: 8,
+        shadowRadius: 24,
       },
       android: {
-        elevation: 4,
+        elevation: 8,
       },
     }),
   },
-  cardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  cardTitleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  cardTitleIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "rgba(45,135,255,0.1)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
   cardTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#1c1c1e",
-  },
-  moreButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "rgba(142,142,147,0.1)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  chartWrapper: {
-    alignItems: "center",
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 8,
-  },
-  chartLegend: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 16,
-    marginTop: 8,
-  },
-  legendItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  legendColor: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-  },
-  legendText: {
-    fontSize: 12,
-    color: "#8e8e93",
-  },
-  reportContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  reportItem: {
-    flex: 1,
-    alignItems: "center",
-  },
-  reportDivider: {
-    width: 1,
-    height: 40,
-    backgroundColor: "#e5e5ea",
-    marginHorizontal: 16,
-  },
-  reportLabel: {
-    fontSize: 13,
-    color: "#8e8e93",
-    marginBottom: 8,
-  },
-  reportValue: {
-    fontSize: 24,
-    fontWeight: "700",
-    marginBottom: 4,
-  },
-  reportUnit: {
-    fontSize: 13,
-    color: "#8e8e93",
-  },
-  exportContainer: {
-    gap: 12,
-  },
-  exportButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    padding: 16,
-    backgroundColor: "rgba(142,142,147,0.1)",
-    borderRadius: 12,
-  },
-  exportButtonText: {
-    fontSize: 15,
+    fontSize: 18,
     fontWeight: "600",
     color: "#1c1c1e",
+    marginBottom: 16,
   },
-  exportTextContainer: {
-    flex: 1,
-  },
-  exportButtonSubtext: {
-    fontSize: 12,
-    color: "#8e8e93",
-    marginTop: 2,
-  },
-  reportDataContainer: {
+  statsGrid: {
     flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
+    flexWrap: "wrap",
+    marginHorizontal: -8,
   },
-  trendIconStyle: {
-    marginTop: 4,
+  statItem: {
+    width: "50%",
+    padding: 8,
+  },
+  statValue: {
+    fontSize: 24,
+    fontWeight: "600",
+    color: "#7F3DFF",
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 14,
+    color: "#8e8e93",
+  },
+  chartCard: {
+    marginBottom: 32,
+  },
+  chartPlaceholder: {
+    height: 200,
+    backgroundColor: "#f5f7fa",
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  placeholderText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#8e8e93",
+    marginBottom: 4,
+  },
+  placeholderSubtext: {
+    fontSize: 14,
+    color: "#8e8e93",
   },
 });
