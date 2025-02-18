@@ -4,19 +4,28 @@ import { BlurView } from "expo-blur";
 import { BloodPressureInput } from "../../components/core/BloodPressureInput";
 import { useState, useRef, useEffect } from "react";
 import { LinearGradient } from "expo-linear-gradient";
-import { MotiView } from "moti";
+import { MotiView, AnimatePresence } from "moti";
+import { TimePeriodSelector } from "../../components/ui/TimePeriodSelector";
+import { BloodPressureTrendChart } from "../../components/core/BloodPressureTrendChart";
+import { generateTrendData } from "../../lib/mockDataGenerator";
+import { TimePeriod, TrendDataPoint, BloodPressureStats } from "../../types/bloodPressure";
 import { useRouter } from "expo-router";
 
-// 定義血壓數據介面
-interface BloodPressureData {
-  systolic: number;
-  diastolic: number;
-  time: string;
+interface TrendState {
+  data: TrendDataPoint[];
+  stats: BloodPressureStats;
 }
+
+const DEFAULT_PERIOD: TimePeriod = "week";
+const TREND_UPDATE_INTERVAL = 1000 * 60 * 60; // 每小時更新一次
+const MODAL_ANIMATION_DURATION = 300;
+const WEATHER_UPDATE_INTERVAL = 1000 * 60 * 30; // 每30分鐘更新一次
 
 export default function HomeScreen() {
   const [showQuickRecord, setShowQuickRecord] = useState(false);
   const [weather, setWeather] = useState({ temp: "23°", condition: "sunny" });
+  const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>(DEFAULT_PERIOD);
+  const [trendState, setTrendState] = useState<TrendState>(() => generateTrendData(DEFAULT_PERIOD));
   const scrollY = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const router = useRouter();
@@ -27,10 +36,28 @@ export default function HomeScreen() {
       duration: 1000,
       useNativeDriver: true,
     }).start();
-  }, []);
+
+    // 定期更新趨勢數據
+    const trendTimer = setInterval(() => {
+      setTrendState(generateTrendData(selectedPeriod));
+    }, TREND_UPDATE_INTERVAL);
+
+    return () => clearInterval(trendTimer);
+  }, [selectedPeriod]);
+
+  // 處理時間週期變更
+  const handlePeriodChange = (period: TimePeriod) => {
+    setSelectedPeriod(period);
+    const newTrendData = generateTrendData(period);
+    setTrendState(newTrendData);
+  };
 
   const handleQuickRecord = () => {
     setShowQuickRecord(true);
+  };
+
+  const handleCloseQuickRecord = () => {
+    setShowQuickRecord(false);
   };
 
   const headerHeight = scrollY.interpolate({
@@ -47,6 +74,11 @@ export default function HomeScreen() {
 
   const handleScroll = Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: false });
 
+  // 處理數據點點擊
+  const handlePointPress = (point: TrendDataPoint) => {
+    console.log("Pressed point:", point);
+  };
+
   // 處理查看詳情點擊
   const handleViewDetails = () => {
     // 這裡可以導航到詳情頁面
@@ -61,24 +93,13 @@ export default function HomeScreen() {
 
   // 新增搜尋處理函數
   const handleSearch = () => {
-    router.push("/search");
+    router.push("/records");
   };
 
   // 新增通知處理函數
   const handleNotification = () => {
     router.push("/profile/notifications");
   };
-
-  // 模擬本週趨勢數據
-  const weeklyData: BloodPressureData[] = [
-    { systolic: 120, diastolic: 80, time: "週一" },
-    { systolic: 118, diastolic: 79, time: "週二" },
-    { systolic: 122, diastolic: 82, time: "週三" },
-    { systolic: 119, diastolic: 78, time: "週四" },
-    { systolic: 121, diastolic: 81, time: "週五" },
-    { systolic: 117, diastolic: 77, time: "週六" },
-    { systolic: 120, diastolic: 80, time: "週日" },
-  ];
 
   return (
     <View style={styles.container}>
@@ -178,7 +199,7 @@ export default function HomeScreen() {
                   <View style={[styles.cardTitleIcon, { backgroundColor: "rgba(127,61,255,0.1)" }]}>
                     <FontAwesome5 name="chart-line" size={14} color="#7F3DFF" />
                   </View>
-                  <Text style={[styles.cardTitle, { color: "#7F3DFF" }]}>本週趨勢</Text>
+                  <Text style={[styles.cardTitle, { color: "#7F3DFF" }]}>血壓趨勢</Text>
                 </View>
                 <Pressable style={({ pressed }) => [styles.moreButton, { backgroundColor: pressed ? "rgba(127,61,255,0.2)" : "rgba(127,61,255,0.1)" }]} onPress={handleViewDetails}>
                   <Text style={[styles.moreButtonText, { color: "#7F3DFF" }]}>查看詳情</Text>
@@ -186,46 +207,11 @@ export default function HomeScreen() {
                 </Pressable>
               </View>
 
-              <View style={styles.trendContainer}>
-                <View style={styles.trendChart}>
-                  {weeklyData.map((data, index) => (
-                    <View key={index} style={styles.trendColumn}>
-                      <View style={styles.trendLines}>
-                        {/* 收縮壓線 */}
-                        <View
-                          style={[
-                            styles.trendLine,
-                            {
-                              top: `${100 - ((data.systolic - 70) / 100) * 100}%`,
-                              backgroundColor: "#7F3DFF",
-                            },
-                          ]}
-                        />
-                        {/* 舒張壓線 */}
-                        <View
-                          style={[
-                            styles.trendLine,
-                            {
-                              top: `${100 - ((data.diastolic - 40) / 100) * 100}%`,
-                              backgroundColor: "#5D5FEF",
-                            },
-                          ]}
-                        />
-                      </View>
-                      <Text style={styles.trendTime}>{data.time}</Text>
-                    </View>
-                  ))}
-                </View>
-                <View style={styles.trendLegend}>
-                  <View style={styles.legendItem}>
-                    <View style={[styles.legendDot, { backgroundColor: "#7F3DFF" }]} />
-                    <Text style={styles.legendText}>收縮壓</Text>
-                  </View>
-                  <View style={styles.legendItem}>
-                    <View style={[styles.legendDot, { backgroundColor: "#5D5FEF" }]} />
-                    <Text style={styles.legendText}>舒張壓</Text>
-                  </View>
-                </View>
+              <View style={styles.periodSelectorContainer}>
+                <TimePeriodSelector selectedPeriod={selectedPeriod} onPeriodChange={handlePeriodChange} />
+              </View>
+              <View style={styles.chartContainer}>
+                <BloodPressureTrendChart data={trendState.data} period={selectedPeriod} onPointPress={handlePointPress} />
               </View>
             </LinearGradient>
           </View>
@@ -258,21 +244,29 @@ export default function HomeScreen() {
       </ScrollView>
 
       {/* 快速記錄模態框 */}
-      {showQuickRecord && (
-        <MotiView from={{ translateY: 1000 }} animate={{ translateY: 0 }} transition={{ type: "spring", damping: 20 }} style={styles.modalContainer}>
-          <BlurView intensity={90} style={styles.modalBlur}>
-            <View style={styles.modalContent}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>記錄血壓</Text>
-                <Pressable onPress={() => setShowQuickRecord(false)} style={styles.closeButton}>
-                  <FontAwesome5 name="times" size={20} color="#8e8e93" />
-                </Pressable>
+      <AnimatePresence>
+        {showQuickRecord && (
+          <MotiView
+            from={{ translateY: 1000, opacity: 0 }}
+            animate={{ translateY: 0, opacity: 1 }}
+            exit={{ translateY: 1000, opacity: 0 }}
+            transition={{ type: "timing", duration: MODAL_ANIMATION_DURATION }}
+            style={styles.modalContainer}
+          >
+            <BlurView intensity={90} style={styles.modalBlur}>
+              <View style={styles.modalContent}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>記錄血壓</Text>
+                  <Pressable onPress={handleCloseQuickRecord} style={styles.closeButton}>
+                    <FontAwesome5 name="times" size={20} color="#8e8e93" />
+                  </Pressable>
+                </View>
+                <BloodPressureInput />
               </View>
-              <BloodPressureInput />
-            </View>
-          </BlurView>
-        </MotiView>
-      )}
+            </BlurView>
+          </MotiView>
+        )}
+      </AnimatePresence>
     </View>
   );
 }
@@ -381,6 +375,7 @@ const styles = StyleSheet.create({
   },
   cardHeader: {
     flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 20,
   },
@@ -486,62 +481,16 @@ const styles = StyleSheet.create({
       },
     }),
   },
-  trendContainer: {
+  periodSelectorContainer: {
+    marginBottom: 16,
+  },
+  chartContainer: {
     marginTop: 16,
+    width: "100%",
     height: 220,
-    width: "100%",
-  },
-  trendChart: {
-    height: 160,
-    flexDirection: "row",
-    alignItems: "flex-end",
-    justifyContent: "space-between",
-    paddingHorizontal: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E5EA",
-  },
-  trendColumn: {
-    flex: 1,
-    height: "100%",
-    alignItems: "center",
-  },
-  trendLines: {
-    width: "100%",
-    height: "100%",
-    position: "relative",
-  },
-  trendLine: {
-    position: "absolute",
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginLeft: -4,
-    left: "50%",
-  },
-  trendTime: {
-    fontSize: 12,
-    color: "#8e8e93",
-    marginTop: 4,
-  },
-  trendLegend: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginTop: 16,
-    gap: 20,
-  },
-  legendItem: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  legendDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: 8,
-  },
-  legendText: {
-    fontSize: 12,
-    color: "#8E8E93",
+    borderRadius: 12,
+    overflow: "hidden",
+    backgroundColor: "rgba(255,255,255,0.05)",
   },
   moreButton: {
     flexDirection: "row",
@@ -559,7 +508,6 @@ const styles = StyleSheet.create({
   quickRecordCard: {
     borderRadius: 24,
     overflow: "hidden",
-    marginHorizontal: 16,
     marginBottom: 16,
     ...Platform.select({
       ios: {
