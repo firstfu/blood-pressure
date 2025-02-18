@@ -5,6 +5,7 @@ import { BloodPressureInput } from "../../components/core/BloodPressureInput";
 import { useState, useRef, useEffect } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import { MotiView } from "moti";
+import { useRouter } from "expo-router";
 
 // 定義血壓數據介面
 interface BloodPressureData {
@@ -18,6 +19,7 @@ export default function HomeScreen() {
   const [weather, setWeather] = useState({ temp: "23°", condition: "sunny" });
   const scrollY = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const router = useRouter();
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -57,6 +59,16 @@ export default function HomeScreen() {
     console.log("Navigate to health tracking page");
   };
 
+  // 新增搜尋處理函數
+  const handleSearch = () => {
+    router.push("/search");
+  };
+
+  // 新增通知處理函數
+  const handleNotification = () => {
+    router.push("/profile/notifications");
+  };
+
   // 模擬本週趨勢數據
   const weeklyData: BloodPressureData[] = [
     { systolic: 120, diastolic: 80, time: "週一" },
@@ -92,11 +104,11 @@ export default function HomeScreen() {
                     </View>
                   </View>
                 </View>
-                <MotiView from={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "timing", duration: 1000 }} style={styles.headerButtons}>
-                  <Pressable style={styles.iconButton}>
+                <MotiView style={styles.headerButtons}>
+                  <Pressable style={styles.iconButton} onPress={handleSearch}>
                     <FontAwesome5 name="search" size={16} color="#fff" />
                   </Pressable>
-                  <Pressable style={styles.iconButton}>
+                  <Pressable style={styles.iconButton} onPress={handleNotification}>
                     <FontAwesome5 name="bell" size={16} color="#fff" />
                   </Pressable>
                 </MotiView>
@@ -175,27 +187,45 @@ export default function HomeScreen() {
               </View>
 
               <View style={styles.trendContainer}>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.trendScrollContent}>
+                <View style={styles.trendChart}>
                   {weeklyData.map((data, index) => (
-                    <View key={index} style={styles.trendItem}>
-                      <View style={styles.trendBar}>
+                    <View key={index} style={styles.trendColumn}>
+                      <View style={styles.trendLines}>
+                        {/* 收縮壓線 */}
                         <View
                           style={[
-                            styles.trendBarFill,
+                            styles.trendLine,
                             {
-                              height: `${((data.systolic - 70) / 100) * 100}%`,
-                              backgroundColor: data.systolic > 140 ? "#ff3b30" : "#34c759",
+                              top: `${100 - ((data.systolic - 70) / 100) * 100}%`,
+                              backgroundColor: "#7F3DFF",
+                            },
+                          ]}
+                        />
+                        {/* 舒張壓線 */}
+                        <View
+                          style={[
+                            styles.trendLine,
+                            {
+                              top: `${100 - ((data.diastolic - 40) / 100) * 100}%`,
+                              backgroundColor: "#5D5FEF",
                             },
                           ]}
                         />
                       </View>
-                      <Text style={styles.trendValue}>
-                        {data.systolic}/{data.diastolic}
-                      </Text>
                       <Text style={styles.trendTime}>{data.time}</Text>
                     </View>
                   ))}
-                </ScrollView>
+                </View>
+                <View style={styles.trendLegend}>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.legendDot, { backgroundColor: "#7F3DFF" }]} />
+                    <Text style={styles.legendText}>收縮壓</Text>
+                  </View>
+                  <View style={styles.legendItem}>
+                    <View style={[styles.legendDot, { backgroundColor: "#5D5FEF" }]} />
+                    <Text style={styles.legendText}>舒張壓</Text>
+                  </View>
+                </View>
               </View>
             </LinearGradient>
           </View>
@@ -458,38 +488,60 @@ const styles = StyleSheet.create({
   },
   trendContainer: {
     marginTop: 16,
-    height: 200,
+    height: 220,
     width: "100%",
   },
-  trendScrollContent: {
+  trendChart: {
+    height: 160,
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
     paddingHorizontal: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E5EA",
   },
-  trendItem: {
+  trendColumn: {
+    flex: 1,
+    height: "100%",
     alignItems: "center",
-    marginHorizontal: 8,
   },
-  trendBar: {
-    width: 8,
-    height: 100,
-    backgroundColor: "#f0f0f0",
-    borderRadius: 4,
-    overflow: "hidden",
-    marginBottom: 8,
-  },
-  trendBarFill: {
-    position: "absolute",
-    bottom: 0,
+  trendLines: {
     width: "100%",
-    borderRadius: 4,
+    height: "100%",
+    position: "relative",
   },
-  trendValue: {
-    fontSize: 12,
-    color: "#1c1c1e",
-    marginBottom: 4,
+  trendLine: {
+    position: "absolute",
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginLeft: -4,
+    left: "50%",
   },
   trendTime: {
     fontSize: 12,
     color: "#8e8e93",
+    marginTop: 4,
+  },
+  trendLegend: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 16,
+    gap: 20,
+  },
+  legendItem: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  legendDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 8,
+  },
+  legendText: {
+    fontSize: 12,
+    color: "#8E8E93",
   },
   moreButton: {
     flexDirection: "row",
