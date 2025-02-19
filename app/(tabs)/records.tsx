@@ -415,11 +415,23 @@ export default function RecordsScreen() {
   // 篩選記錄
   const getFilteredRecords = () => {
     const now = new Date();
-    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    now.setHours(0, 0, 0, 0); // 設置今天的時間為午夜
+
+    const oneWeekAgo = new Date(now);
+    oneWeekAgo.setDate(now.getDate() - 7);
+    oneWeekAgo.setHours(0, 0, 0, 0);
+
+    const oneMonthAgo = new Date(now);
+    oneMonthAgo.setMonth(now.getMonth() - 1);
+    oneMonthAgo.setHours(0, 0, 0, 0);
 
     let filteredRecords = [...records];
     console.log("Initial records:", filteredRecords.length);
+    console.log("Date ranges:", {
+      now: now.toISOString(),
+      oneWeekAgo: oneWeekAgo.toISOString(),
+      oneMonthAgo: oneMonthAgo.toISOString(),
+    });
 
     // 進階篩選
     filteredRecords = filteredRecords.filter(record => {
@@ -468,11 +480,19 @@ export default function RecordsScreen() {
     let result;
     switch (activeFilter) {
       case "week":
-        result = filteredRecords.filter(record => new Date(record.date) >= oneWeekAgo);
+        result = filteredRecords.filter(record => {
+          const recordDate = new Date(record.date);
+          recordDate.setHours(0, 0, 0, 0);
+          return recordDate >= oneWeekAgo;
+        });
         console.log("Week filter applied:", result.length);
         return result;
       case "month":
-        result = filteredRecords.filter(record => new Date(record.date) >= oneMonthAgo);
+        result = filteredRecords.filter(record => {
+          const recordDate = new Date(record.date);
+          recordDate.setHours(0, 0, 0, 0);
+          return recordDate >= oneMonthAgo;
+        });
         console.log("Month filter applied:", result.length);
         return result;
       case "abnormal":
