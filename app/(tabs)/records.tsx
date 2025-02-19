@@ -205,9 +205,9 @@ export default function RecordsScreen() {
         </LinearGradient>
       </View>
 
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent} showsVerticalScrollIndicator={false}>
-        {/* 主要內容區 */}
-        <View style={styles.mainContent}>
+      {/* 主要內容區 */}
+      <View style={styles.mainContent}>
+        <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent} showsVerticalScrollIndicator={false}>
           {/* 快速篩選 */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
             <View style={styles.filterContainer}>
@@ -283,8 +283,8 @@ export default function RecordsScreen() {
               ))
             )}
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </View>
 
       <EditModal
         visible={editModalVisible}
@@ -314,6 +314,7 @@ const styles = StyleSheet.create({
   headerContainer: {
     width: "100%",
     backgroundColor: "#2d87ff",
+    paddingTop: Platform.OS === "android" ? 20 : 0,
   },
   headerGradient: {
     width: "100%",
@@ -323,32 +324,32 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 16,
-    paddingTop: Platform.OS === "android" ? 8 : 0,
-    paddingBottom: 12,
-    height: Platform.OS === "android" ? 80 : 44,
+    paddingVertical: 12,
+    height: Platform.OS === "android" ? 64 : 56,
+    paddingTop: Platform.OS === "android" ? 12 : 8,
   },
   headerContent: {
     flex: 1,
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: "600",
+    fontSize: 24,
+    fontWeight: "700",
     color: "#fff",
-    marginBottom: 2,
+    marginBottom: 4,
   },
   headerSubtitle: {
-    fontSize: 13,
+    fontSize: 14,
     color: "rgba(255,255,255,0.8)",
   },
   headerButtons: {
     flexDirection: "row",
-    gap: 8,
+    gap: 12,
   },
   iconButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "rgba(255,255,255,0.2)",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.15)",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -364,28 +365,27 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f7fa",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    marginTop: -24,
-    paddingTop: 24,
+    paddingTop: 12,
   },
   filterScroll: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
   filterContainer: {
     flexDirection: "row",
     paddingHorizontal: 16,
-    gap: 8,
+    gap: 12,
   },
   filterButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
     backgroundColor: "rgba(142,142,147,0.1)",
   },
   filterButtonActive: {
     backgroundColor: "#2d87ff",
   },
   filterButtonText: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: "600",
     color: "#8e8e93",
   },
@@ -394,24 +394,24 @@ const styles = StyleSheet.create({
   },
   recordsList: {
     paddingHorizontal: 16,
-    paddingBottom: Platform.OS === "ios" ? 120 : 100,
   },
   recordCardContainer: {
-    marginBottom: 12,
+    marginBottom: 16,
   },
   recordCardPressed: {
-    opacity: 0.7,
+    opacity: 0.8,
+    transform: [{ scale: 0.98 }],
   },
   recordCard: {
     backgroundColor: "#fff",
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 16,
     ...Platform.select({
       ios: {
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.1,
-        shadowRadius: 8,
+        shadowRadius: 12,
       },
       android: {
         elevation: 4,
@@ -430,12 +430,12 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   recordDate: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "600",
     color: "#1c1c1e",
   },
   recordTime: {
-    fontSize: 13,
+    fontSize: 14,
     color: "#8e8e93",
   },
   actionButtons: {
@@ -443,10 +443,10 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   actionButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#f5f7fa",
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(142,142,147,0.1)",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -454,7 +454,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(142,142,147,0.1)",
   },
   recordItem: {
     flex: 1,
@@ -463,39 +465,42 @@ const styles = StyleSheet.create({
   recordDivider: {
     width: 1,
     height: 40,
-    backgroundColor: "#e5e5ea",
+    backgroundColor: "rgba(142,142,147,0.1)",
   },
   recordLabel: {
     fontSize: 13,
     color: "#8e8e93",
-    marginBottom: 4,
+    marginBottom: 6,
   },
   recordValue: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: "700",
     color: "#1c1c1e",
-    marginBottom: 2,
+    marginBottom: 4,
   },
   recordUnit: {
     fontSize: 12,
     color: "#8e8e93",
   },
   noteText: {
-    fontSize: 13,
+    fontSize: 14,
     color: "#8e8e93",
-    marginBottom: 12,
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(142,142,147,0.1)",
   },
   fab: {
     position: "absolute",
-    right: 16,
+    right: 20,
     bottom: Platform.OS === "ios" ? 100 : 80,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     ...Platform.select({
       ios: {
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
+        shadowOffset: { width: 0, height: 6 },
         shadowOpacity: 0.2,
         shadowRadius: 8,
       },
@@ -507,7 +512,7 @@ const styles = StyleSheet.create({
   fabGradient: {
     width: "100%",
     height: "100%",
-    borderRadius: 28,
+    borderRadius: 30,
     alignItems: "center",
     justifyContent: "center",
   },

@@ -61,6 +61,13 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="assistant"
+        options={{
+          title: "AI 助手",
+          tabBarIcon: ({ color, size }) => <FontAwesome5 name="comment-medical" size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           title: "我的",

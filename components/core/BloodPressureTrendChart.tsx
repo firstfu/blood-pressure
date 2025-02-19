@@ -1,13 +1,14 @@
 import React from "react";
 import { View, Text, StyleSheet, Dimensions } from "react-native";
 import { LineChart } from "react-native-chart-kit";
-import { TrendDataPoint } from "../../types/bloodPressure";
+import { TrendDataPoint, TimePeriod } from "../../types/bloodPressure";
 
 interface Props {
   data: TrendDataPoint[];
+  period: TimePeriod;
 }
 
-export function BloodPressureTrendChart({ data }: Props) {
+export function BloodPressureTrendChart({ data, period }: Props) {
   const chartData = {
     labels: data.map(point => point.time),
     datasets: [
@@ -40,6 +41,22 @@ export function BloodPressureTrendChart({ data }: Props) {
     },
   };
 
+  // 根據時間週期調整圖表顯示
+  const getChartHeight = () => {
+    switch (period) {
+      case "day":
+        return 200;
+      case "week":
+        return 220;
+      case "month":
+        return 250;
+      case "year":
+        return 280;
+      default:
+        return 220;
+    }
+  };
+
   const screenWidth = Dimensions.get("window").width - 32; // 考慮左右邊距
 
   return (
@@ -47,7 +64,7 @@ export function BloodPressureTrendChart({ data }: Props) {
       <LineChart
         data={chartData}
         width={screenWidth}
-        height={220}
+        height={getChartHeight()}
         chartConfig={chartConfig}
         bezier
         style={styles.chart}
@@ -62,6 +79,27 @@ export function BloodPressureTrendChart({ data }: Props) {
         fromZero={false}
         yAxisInterval={20}
         segments={5}
+        getDotColor={(dataPoint, dataSetIndex) => {
+          const value = dataSetIndex === 0 ? dataPoint : null;
+          if (value && value > 140) return "#ff3b30"; // 高
+          if (value && value < 90) return "#5856d6"; // 低
+          return dataSetIndex === 0 ? "#ff3b30" : "#34c759"; // 正常
+        }}
+        renderDotContent={({ x, y, index, indexData }) => (
+          <Text
+            key={index}
+            style={[
+              styles.dotLabel,
+              {
+                position: "absolute",
+                top: y - 20,
+                left: x - 15,
+              },
+            ]}
+          >
+            {indexData}
+          </Text>
+        )}
       />
       <View style={styles.legend}>
         {chartData.legend.map((label, index) => (
@@ -108,6 +146,10 @@ const styles = StyleSheet.create({
   },
   legendText: {
     fontSize: 12,
+    color: "#8e8e93",
+  },
+  dotLabel: {
+    fontSize: 10,
     color: "#8e8e93",
   },
 });
