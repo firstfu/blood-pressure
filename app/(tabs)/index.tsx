@@ -208,6 +208,30 @@ export default function HomeScreen() {
           </View>
 
           {/* 血壓趨勢圖表 */}
+          <View style={styles.trendChartCard}>
+            <View style={styles.trendChartHeader}>
+              <Text style={styles.trendChartTitle}>血壓趨勢</Text>
+              <TimePeriodSelector selectedPeriod={selectedPeriod} onPeriodChange={handlePeriodChange} />
+            </View>
+            <BloodPressureTrendChart data={trendState.data} onPointPress={handlePointPress} />
+            <View style={styles.statsContainer}>
+              <View style={styles.statItem}>
+                <Text style={styles.statLabel}>平均收縮壓</Text>
+                <Text style={[styles.statValue, { color: "#7F3DFF" }]}>{trendState.stats.average.systolic}</Text>
+                <Text style={styles.statUnit}>mmHg</Text>
+              </View>
+              <View style={styles.statItem}>
+                <Text style={styles.statLabel}>平均舒張壓</Text>
+                <Text style={[styles.statValue, { color: "#5D5FEF" }]}>{trendState.stats.average.diastolic}</Text>
+                <Text style={styles.statUnit}>mmHg</Text>
+              </View>
+              <View style={styles.statItem}>
+                <Text style={styles.statLabel}>平均心率</Text>
+                <Text style={[styles.statValue, { color: "#34C759" }]}>{trendState.stats.average.heartRate}</Text>
+                <Text style={styles.statUnit}>BPM</Text>
+              </View>
+            </View>
+          </View>
         </MotiView>
       </ScrollView>
 

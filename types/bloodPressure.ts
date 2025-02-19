@@ -9,13 +9,14 @@ export interface BloodPressureRecord {
 
 // 血壓統計數據
 export interface BloodPressureStats {
-  avgSystolic: number;
-  avgDiastolic: number;
-  avgPulse: number;
-  maxSystolic: number;
-  minSystolic: number;
-  maxDiastolic: number;
-  minDiastolic: number;
+  average: {
+    systolic: number;
+    diastolic: number;
+    heartRate: number;
+  };
+  max: BloodPressureRecord;
+  min: BloodPressureRecord;
+  trend: "rising" | "falling" | "stable";
 }
 
 // 時間週期選項
