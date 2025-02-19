@@ -190,7 +190,7 @@ export default function HomeScreen() {
 
           {/* 功能按鈕區 */}
           <View style={styles.actionButtonsContainer}>
-            <Pressable style={styles.actionButton} onPress={() => router.push("/records")}>
+            <Pressable style={styles.actionButton} onPress={() => router.push("/camera")}>
               <View style={[styles.actionButtonIcon, { backgroundColor: "rgba(52,199,89,0.1)" }]}>
                 <FontAwesome5 name="camera" size={20} color="#34C759" />
               </View>
