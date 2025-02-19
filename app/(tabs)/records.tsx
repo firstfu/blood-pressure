@@ -137,6 +137,36 @@ export default function RecordsScreen() {
 
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<BloodPressureRecord | null>(null);
+  const [activeFilter, setActiveFilter] = useState("all");
+  const [searchModalVisible, setSearchModalVisible] = useState(false);
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
+  const [addModalVisible, setAddModalVisible] = useState(false);
+
+  const handleFilterPress = (filter: string) => {
+    setActiveFilter(filter);
+    // TODO: 實現篩選邏輯
+  };
+
+  const handleSearchPress = () => {
+    Alert.alert("搜尋", "搜尋功能開發中");
+  };
+
+  const handleAdvancedFilterPress = () => {
+    Alert.alert("進階篩選", "進階篩選功能開發中");
+  };
+
+  const handleAddPress = () => {
+    const newRecord: BloodPressureRecord = {
+      id: String(Date.now()),
+      systolic: 0,
+      diastolic: 0,
+      heartRate: 0,
+      date: new Date().toISOString().split("T")[0],
+      time: new Date().toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit" }),
+    };
+    setSelectedRecord(newRecord);
+    setEditModalVisible(true);
+  };
 
   const handleEdit = (record: BloodPressureRecord) => {
     setSelectedRecord(record);
@@ -183,7 +213,6 @@ export default function RecordsScreen() {
 
   return (
     <View style={styles.container}>
-      {/* 頂部區域 */}
       <View style={styles.headerContainer}>
         <LinearGradient colors={["#2d87ff", "#1a6cd4"]} start={[0, 0]} end={[1, 1]} style={styles.headerGradient}>
           <SafeAreaView>
@@ -193,10 +222,10 @@ export default function RecordsScreen() {
                 <Text style={styles.headerSubtitle}>共 {records.length} 筆記錄</Text>
               </View>
               <View style={styles.headerButtons}>
-                <Pressable style={styles.iconButton}>
+                <Pressable style={({ pressed }) => [styles.iconButton, pressed && { opacity: 0.8 }]} onPress={handleSearchPress}>
                   <FontAwesome name="search" size={18} color="#fff" />
                 </Pressable>
-                <Pressable style={styles.iconButton}>
+                <Pressable style={({ pressed }) => [styles.iconButton, pressed && { opacity: 0.8 }]} onPress={handleAdvancedFilterPress}>
                   <FontAwesome name="filter" size={18} color="#fff" />
                 </Pressable>
               </View>
@@ -205,23 +234,21 @@ export default function RecordsScreen() {
         </LinearGradient>
       </View>
 
-      {/* 主要內容區 */}
       <View style={styles.mainContent}>
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent} showsVerticalScrollIndicator={false}>
-          {/* 快速篩選 */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
             <View style={styles.filterContainer}>
-              <Pressable style={[styles.filterButton, styles.filterButtonActive]}>
-                <Text style={[styles.filterButtonText, styles.filterButtonTextActive]}>全部記錄</Text>
+              <Pressable style={[styles.filterButton, activeFilter === "all" && styles.filterButtonActive]} onPress={() => handleFilterPress("all")}>
+                <Text style={[styles.filterButtonText, activeFilter === "all" && styles.filterButtonTextActive]}>全部記錄</Text>
               </Pressable>
-              <Pressable style={styles.filterButton}>
-                <Text style={styles.filterButtonText}>本週</Text>
+              <Pressable style={[styles.filterButton, activeFilter === "week" && styles.filterButtonActive]} onPress={() => handleFilterPress("week")}>
+                <Text style={[styles.filterButtonText, activeFilter === "week" && styles.filterButtonTextActive]}>本週</Text>
               </Pressable>
-              <Pressable style={styles.filterButton}>
-                <Text style={styles.filterButtonText}>本月</Text>
+              <Pressable style={[styles.filterButton, activeFilter === "month" && styles.filterButtonActive]} onPress={() => handleFilterPress("month")}>
+                <Text style={[styles.filterButtonText, activeFilter === "month" && styles.filterButtonTextActive]}>本月</Text>
               </Pressable>
-              <Pressable style={styles.filterButton}>
-                <Text style={styles.filterButtonText}>異常記錄</Text>
+              <Pressable style={[styles.filterButton, activeFilter === "abnormal" && styles.filterButtonActive]} onPress={() => handleFilterPress("abnormal")}>
+                <Text style={[styles.filterButtonText, activeFilter === "abnormal" && styles.filterButtonTextActive]}>異常記錄</Text>
               </Pressable>
             </View>
           </ScrollView>
@@ -296,8 +323,7 @@ export default function RecordsScreen() {
         onSave={handleSaveEdit}
       />
 
-      {/* 新增記錄按鈕 */}
-      <Pressable style={styles.fab}>
+      <Pressable style={styles.fab} onPress={handleAddPress}>
         <LinearGradient colors={["#2d87ff", "#1a6cd4"]} start={[0, 0]} end={[1, 1]} style={styles.fabGradient}>
           <FontAwesome name="plus" size={24} color="#fff" />
         </LinearGradient>
@@ -493,7 +519,7 @@ const styles = StyleSheet.create({
   fab: {
     position: "absolute",
     right: 20,
-    bottom: Platform.OS === "ios" ? 100 : 80,
+    bottom: Platform.OS === "ios" ? 32 : 24,
     width: 60,
     height: 60,
     borderRadius: 30,
