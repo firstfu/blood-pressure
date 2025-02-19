@@ -4,6 +4,8 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import { MotiView } from "moti";
 import { router } from "expo-router";
 import { useState } from "react";
+import { exportToCSV, exportToPDF } from "../../lib/exportService";
+import { useBloodPressureStore } from "../../store/bloodPressureStore";
 
 interface SettingOption {
   id: string;
@@ -89,6 +91,50 @@ export default function SettingsScreen() {
       type: "switch",
       value: settings.autoBackup,
       description: "自動備份數據",
+    },
+    {
+      id: "export",
+      title: "數據導出",
+      icon: "file-export",
+      type: "button",
+      description: "導出血壓記錄數據",
+      onPress: async () => {
+        const records = useBloodPressureStore.getState().records;
+
+        if (records.length === 0) {
+          Alert.alert("提示", "目前沒有可導出的記錄");
+          return;
+        }
+
+        Alert.alert("導出數據", "請選擇導出格式", [
+          {
+            text: "CSV",
+            onPress: async () => {
+              try {
+                await exportToCSV(records);
+                Alert.alert("成功", "數據已成功導出為 CSV 檔案");
+              } catch (error) {
+                Alert.alert("錯誤", "導出 CSV 失敗");
+              }
+            },
+          },
+          {
+            text: "PDF",
+            onPress: async () => {
+              try {
+                await exportToPDF(records);
+                Alert.alert("成功", "數據已成功導出為 PDF 檔案");
+              } catch (error) {
+                Alert.alert("錯誤", "導出 PDF 失敗");
+              }
+            },
+          },
+          {
+            text: "取消",
+            style: "cancel",
+          },
+        ]);
+      },
     },
     {
       id: "about",

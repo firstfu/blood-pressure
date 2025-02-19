@@ -1,11 +1,16 @@
 import { StyleSheet, View, Text, SafeAreaView, ScrollView, Pressable, Platform, Alert, Dimensions, Share } from "react-native";
-import { FontAwesome } from "@expo/vector-icons";
+import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import * as Calendar from "expo-calendar";
 import * as FileSystem from "expo-file-system";
 import ViewShot, { captureRef } from "react-native-view-shot";
 import { MotiView } from "moti";
+import { useBloodPressureStore } from "../../store/bloodPressureStore";
+import { analyzeBloodPressure, generateTrendData, calculateBPDistribution } from "../../lib/statisticsService";
+import { TimePeriod, BloodPressureStats, TrendDataPoint } from "../../types/bloodPressure";
+import { BloodPressureTrendChart } from "../../components/core/BloodPressureTrendChart";
+import { TimePeriodSelector } from "../../components/ui/TimePeriodSelector";
 
 type DateRange = "week" | "month" | "year" | "custom";
 type ChartType = "line" | "bar" | "pie";
@@ -19,11 +24,52 @@ type ChartData = {
 };
 
 export default function StatisticsScreen() {
+  const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("week");
+  const [stats, setStats] = useState<BloodPressureStats | null>(null);
+  const [trendData, setTrendData] = useState<TrendDataPoint[]>([]);
+  const [distribution, setDistribution] = useState<Array<{ category: string; percentage: number; count: number }>>([]);
   const [chartType, setChartType] = useState<ChartType>("line");
   const [dateRange, setDateRange] = useState<DateRange>("week");
   const [selectedStartDate, setSelectedStartDate] = useState<Date>(new Date());
   const [selectedEndDate, setSelectedEndDate] = useState<Date>(new Date());
   const viewShotRef = useRef(null);
+
+  const records = useBloodPressureStore(state => state.records);
+
+  // 更新統計數據
+  const updateStatistics = useCallback(() => {
+    if (records.length === 0) {
+      Alert.alert("提示", "目前沒有血壓記錄");
+      return;
+    }
+
+    try {
+      // 計算基本統計數據
+      const newStats = analyzeBloodPressure(records);
+      setStats(newStats);
+
+      // 生成趨勢數據
+      const newTrendData = generateTrendData(records, selectedPeriod);
+      setTrendData(newTrendData);
+
+      // 計算分佈數據
+      const newDistribution = calculateBPDistribution(records);
+      setDistribution(newDistribution);
+    } catch (error) {
+      console.error("統計數據計算錯誤:", error);
+      Alert.alert("錯誤", "統計數據計算失敗");
+    }
+  }, [records, selectedPeriod]);
+
+  // 當記錄或時間週期改變時更新統計
+  useEffect(() => {
+    updateStatistics();
+  }, [updateStatistics]);
+
+  // 處理時間週期變更
+  const handlePeriodChange = (period: TimePeriod) => {
+    setSelectedPeriod(period);
+  };
 
   // 生成模擬數據
   const generateMockData = useCallback(
@@ -404,48 +450,66 @@ export default function StatisticsScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <LinearGradient colors={["#7F3DFF", "#5D5FEF"]} style={styles.header}>
-        <Text style={styles.headerTitle}>數據統計</Text>
-      </LinearGradient>
-
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <MotiView style={styles.card} from={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: "timing", duration: 500 }}>
-          <Text style={styles.cardTitle}>本月概覽</Text>
-          <View style={styles.statsGrid}>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>120/80</Text>
-              <Text style={styles.statLabel}>平均血壓</Text>
+    <SafeAreaView style={styles.container}>
+      <ScrollView style={styles.scrollView}>
+        {/* 頂部統計卡片 */}
+        <MotiView style={styles.statsCard} from={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: "timing", duration: 500 }}>
+          <Text style={styles.cardTitle}>血壓統計概覽</Text>
+          {stats && (
+            <View style={styles.statsGrid}>
+              <View style={styles.statsItem}>
+                <Text style={styles.statsLabel}>平均收縮壓</Text>
+                <Text style={styles.statsValue}>{stats.average.systolic}</Text>
+                <FontAwesome5
+                  name={stats.trend === "rising" ? "arrow-up" : stats.trend === "falling" ? "arrow-down" : "minus"}
+                  size={16}
+                  color={stats.trend === "stable" ? "#8e8e93" : stats.trend === "rising" ? "#ff3b30" : "#34c759"}
+                />
+              </View>
+              <View style={styles.statsItem}>
+                <Text style={styles.statsLabel}>平均舒張壓</Text>
+                <Text style={styles.statsValue}>{stats.average.diastolic}</Text>
+              </View>
+              <View style={styles.statsItem}>
+                <Text style={styles.statsLabel}>平均心率</Text>
+                <Text style={styles.statsValue}>{stats.average.heartRate}</Text>
+              </View>
             </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>72</Text>
-              <Text style={styles.statLabel}>平均心率</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>28</Text>
-              <Text style={styles.statLabel}>測量次數</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>93%</Text>
-              <Text style={styles.statLabel}>完成率</Text>
-            </View>
-          </View>
+          )}
         </MotiView>
 
-        <MotiView
-          style={[styles.card, styles.chartCard]}
-          from={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ type: "timing", duration: 500, delay: 200 }}
-        >
-          <Text style={styles.cardTitle}>趨勢圖</Text>
-          <View style={styles.chartPlaceholder}>
-            <Text style={styles.placeholderText}>圖表區域</Text>
-            <Text style={styles.placeholderSubtext}>即將推出</Text>
-          </View>
-        </MotiView>
+        {/* 時間週期選擇器 */}
+        <TimePeriodSelector selectedPeriod={selectedPeriod} onPeriodChange={handlePeriodChange} />
+
+        {/* 趨勢圖表 */}
+        {trendData.length > 0 && (
+          <MotiView style={styles.chartCard} from={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: "timing", duration: 500 }}>
+            <Text style={styles.cardTitle}>血壓趨勢</Text>
+            <BloodPressureTrendChart data={trendData} period={selectedPeriod} />
+          </MotiView>
+        )}
+
+        {/* 分布統計 */}
+        {distribution.length > 0 && (
+          <MotiView style={styles.distributionCard} from={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: "timing", duration: 500 }}>
+            <Text style={styles.cardTitle}>血壓分布</Text>
+            <View style={styles.distributionList}>
+              {distribution.map(item => (
+                <View key={item.category} style={styles.distributionItem}>
+                  <View style={styles.distributionBar}>
+                    <View style={[styles.distributionBarFill, { width: `${item.percentage}%` }, { backgroundColor: getStatusColor(item.category) }]} />
+                  </View>
+                  <View style={styles.distributionInfo}>
+                    <Text style={styles.distributionLabel}>{item.category}</Text>
+                    <Text style={styles.distributionValue}>{item.percentage}%</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </MotiView>
+        )}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -454,23 +518,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f5f7fa",
   },
-  header: {
-    paddingTop: Platform.OS === "ios" ? 60 : 40,
-    paddingBottom: 20,
-    paddingHorizontal: 16,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: "#fff",
-  },
-  content: {
+  scrollView: {
     flex: 1,
     padding: 16,
   },
-  card: {
+  statsCard: {
     backgroundColor: "#fff",
     borderRadius: 24,
     padding: 20,
@@ -495,41 +547,83 @@ const styles = StyleSheet.create({
   },
   statsGrid: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    marginHorizontal: -8,
+    justifyContent: "space-between",
   },
-  statItem: {
-    width: "50%",
-    padding: 8,
+  statsItem: {
+    alignItems: "center",
   },
-  statValue: {
+  statsLabel: {
+    fontSize: 14,
+    color: "#8e8e93",
+    marginBottom: 4,
+  },
+  statsValue: {
     fontSize: 24,
     fontWeight: "600",
-    color: "#7F3DFF",
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 14,
-    color: "#8e8e93",
+    color: "#1c1c1e",
   },
   chartCard: {
-    marginBottom: 32,
+    backgroundColor: "#fff",
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 16,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.1,
+        shadowRadius: 24,
+      },
+      android: {
+        elevation: 8,
+      },
+    }),
   },
-  chartPlaceholder: {
-    height: 200,
-    backgroundColor: "#f5f7fa",
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
+  distributionCard: {
+    backgroundColor: "#fff",
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 16,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.1,
+        shadowRadius: 24,
+      },
+      android: {
+        elevation: 8,
+      },
+    }),
   },
-  placeholderText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#8e8e93",
-    marginBottom: 4,
+  distributionList: {
+    marginTop: 8,
   },
-  placeholderSubtext: {
+  distributionItem: {
+    marginBottom: 12,
+  },
+  distributionBar: {
+    height: 8,
+    backgroundColor: "#f2f2f7",
+    borderRadius: 4,
+    overflow: "hidden",
+  },
+  distributionBarFill: {
+    height: "100%",
+    borderRadius: 4,
+  },
+  distributionInfo: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 4,
+  },
+  distributionLabel: {
     fontSize: 14,
     color: "#8e8e93",
+  },
+  distributionValue: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#1c1c1e",
   },
 });

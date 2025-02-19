@@ -1,124 +1,113 @@
 import React from "react";
 import { View, Text, StyleSheet, Dimensions } from "react-native";
-// @ts-ignore
-import { LineChart } from "react-native-gifted-charts";
+import { LineChart } from "react-native-chart-kit";
 import { TrendDataPoint } from "../../types/bloodPressure";
 
 interface Props {
   data: TrendDataPoint[];
-  onPointPress?: (point: TrendDataPoint) => void;
 }
 
-interface ChartDataPoint {
-  value: number;
-  date: Date;
-  label: string;
-  dataPointText: string;
-}
-
-export const BloodPressureTrendChart: React.FC<Props> = ({ data, onPointPress }) => {
-  // 將數據轉換為圖表所需的格式
-  const systolicData = data.map(point => ({
-    value: point.systolic,
-    label: new Date(point.timestamp).toLocaleDateString("zh-TW", { month: "short", day: "numeric" }),
-    dataPointText: point.systolic.toString(),
-    topLabelComponent: () => <Text style={{ color: "#7F3DFF", fontSize: 10 }}>{point.systolic}</Text>,
-  }));
-
-  const diastolicData = data.map(point => ({
-    value: point.diastolic,
-    label: new Date(point.timestamp).toLocaleDateString("zh-TW", { month: "short", day: "numeric" }),
-    dataPointText: point.diastolic.toString(),
-    topLabelComponent: () => <Text style={{ color: "#5D5FEF", fontSize: 10 }}>{point.diastolic}</Text>,
-  }));
-
-  // 定義血壓正常範圍的背景區域
-  const normalRange = {
-    systolic: { min: 90, max: 120 },
-    diastolic: { min: 60, max: 80 },
+export function BloodPressureTrendChart({ data }: Props) {
+  const chartData = {
+    labels: data.map(point => point.time),
+    datasets: [
+      {
+        data: data.map(point => point.systolic),
+        color: (opacity = 1) => `rgba(255, 59, 48, ${opacity})`, // 收縮壓（紅色）
+        strokeWidth: 2,
+      },
+      {
+        data: data.map(point => point.diastolic),
+        color: (opacity = 1) => `rgba(52, 199, 89, ${opacity})`, // 舒張壓（綠色）
+        strokeWidth: 2,
+      },
+    ],
+    legend: ["收縮壓", "舒張壓"],
   };
+
+  const chartConfig = {
+    backgroundColor: "#ffffff",
+    backgroundGradientFrom: "#ffffff",
+    backgroundGradientTo: "#ffffff",
+    decimalPlaces: 0,
+    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+    style: {
+      borderRadius: 16,
+    },
+    propsForDots: {
+      r: "4",
+      strokeWidth: "2",
+    },
+  };
+
+  const screenWidth = Dimensions.get("window").width - 32; // 考慮左右邊距
 
   return (
     <View style={styles.container}>
-      {/* @ts-ignore */}
       <LineChart
-        areaChart
-        data={systolicData}
-        data2={diastolicData}
-        height={200}
-        width={Dimensions.get("window").width - 40}
-        spacing={40}
-        initialSpacing={20}
-        color1="#7F3DFF"
-        color2="#5D5FEF"
-        textColor1="#7F3DFF"
-        textColor2="#5D5FEF"
-        textShiftY={-8}
-        textShiftX={-5}
-        dataPointsHeight={6}
-        dataPointsWidth={6}
-        curved
-        thickness={2}
-        hideRules
-        yAxisThickness={0}
-        xAxisThickness={0}
-        yAxisTextStyle={styles.yAxisText}
-        xAxisLabelTextStyle={styles.xAxisText}
-        noOfSections={6}
-        maxHeight={180}
-        yAxisLabelSuffix=" mmHg"
-        onPress={item => {
-          if (onPointPress && item) {
-            const point = data.find(p => p.systolic === item.value || p.diastolic === item.value);
-            if (point) {
-              onPointPress(point);
-            }
-          }
-        }}
-        pointerConfig={{
-          pointerStripHeight: 160,
-          pointerStripColor: "rgba(0,0,0,0.1)",
-          pointerStripWidth: 2,
-          pointerColor: "#7F3DFF",
-          radius: 6,
-          pointerLabelWidth: 100,
-          pointerLabelHeight: 40,
-          activatePointersOnLongPress: true,
-          autoAdjustPointerLabelPosition: true,
-          pointerLabelComponent: item => (
-            <View style={styles.tooltip}>
-              <Text style={styles.tooltipText}>{item.value} mmHg</Text>
-            </View>
-          ),
-        }}
+        data={chartData}
+        width={screenWidth}
+        height={220}
+        chartConfig={chartConfig}
+        bezier
+        style={styles.chart}
+        withDots={true}
+        withShadow={false}
+        withInnerLines={true}
+        withOuterLines={true}
+        withVerticalLines={false}
+        withHorizontalLines={true}
+        withVerticalLabels={true}
+        withHorizontalLabels={true}
+        fromZero={false}
+        yAxisInterval={20}
+        segments={5}
       />
+      <View style={styles.legend}>
+        {chartData.legend.map((label, index) => (
+          <View key={label} style={styles.legendItem}>
+            <View
+              style={[
+                styles.legendColor,
+                {
+                  backgroundColor: chartData.datasets[index].color(1),
+                },
+              ]}
+            />
+            <Text style={styles.legendText}>{label}</Text>
+          </View>
+        ))}
+      </View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#fff",
-    padding: 16,
-    borderRadius: 12,
+    alignItems: "center",
   },
-  yAxisText: {
-    color: "#8e8e93",
+  chart: {
+    marginVertical: 8,
+    borderRadius: 16,
+  },
+  legend: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 8,
+  },
+  legendItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginHorizontal: 8,
+  },
+  legendColor: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 4,
+  },
+  legendText: {
     fontSize: 12,
-  },
-  xAxisText: {
     color: "#8e8e93",
-    fontSize: 10,
-    width: 60,
-    textAlign: "center",
-  },
-  tooltip: {
-    backgroundColor: "rgba(0,0,0,0.8)",
-    padding: 8,
-    borderRadius: 4,
-  },
-  tooltipText: {
-    color: "#fff",
-    fontSize: 12,
   },
 });

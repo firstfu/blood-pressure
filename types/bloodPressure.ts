@@ -1,10 +1,12 @@
 // 血壓數據記錄
 export interface BloodPressureRecord {
+  id: string;
   systolic: number; // 收縮壓
   diastolic: number; // 舒張壓
   heartRate: number; // 心率
-  timestamp: Date; // 記錄時間
+  timestamp: number; // 記錄時間戳
   note?: string; // 備註（選填）
+  category?: "morning" | "noon" | "evening" | "night"; // 測量時段
 }
 
 // 血壓統計數據
