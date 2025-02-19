@@ -2,7 +2,6 @@ import { StyleSheet, View, Text, SafeAreaView, ScrollView, Pressable, Platform, 
 import { FontAwesome } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useState, useCallback, useRef } from "react";
-import { LineChart, BarChart, PieChart } from "react-native-chart-kit";
 import * as Calendar from "expo-calendar";
 import * as FileSystem from "expo-file-system";
 import ViewShot, { captureRef } from "react-native-view-shot";
@@ -402,110 +401,6 @@ export default function StatisticsScreen() {
     strokeWidth: 2,
     barPercentage: 0.5,
     useShadowColorFromDataset: false,
-  };
-
-  // 渲染圖表
-  const renderChart = () => {
-    const screenWidth = Dimensions.get("window").width - 32;
-
-    switch (chartType) {
-      case "line":
-        return (
-          <LineChart
-            data={{
-              labels: ["一", "二", "三", "四", "五", "六", "日"],
-              datasets: [
-                {
-                  data: [120, 125, 118, 128, 122, 130, 125],
-                  color: (opacity = 1) => `rgba(45, 135, 255, ${opacity})`,
-                  strokeWidth: 2,
-                },
-                {
-                  data: [80, 82, 78, 85, 80, 88, 82],
-                  color: (opacity = 1) => `rgba(52, 199, 89, ${opacity})`,
-                  strokeWidth: 2,
-                },
-              ],
-            }}
-            width={screenWidth}
-            height={180}
-            chartConfig={chartConfig}
-            bezier
-            style={{
-              marginVertical: 8,
-              borderRadius: 12,
-            }}
-          />
-        );
-      case "pie":
-        return (
-          <PieChart
-            data={[
-              {
-                name: "正常",
-                population: 65,
-                color: "#34c759",
-                legendFontColor: "#7F7F7F",
-                legendFontSize: 12,
-              },
-              {
-                name: "偏高",
-                population: 25,
-                color: "#ffd60a",
-                legendFontColor: "#7F7F7F",
-                legendFontSize: 12,
-              },
-              {
-                name: "高血壓",
-                population: 10,
-                color: "#ff3b30",
-                legendFontColor: "#7F7F7F",
-                legendFontSize: 12,
-              },
-            ]}
-            width={screenWidth}
-            height={180}
-            chartConfig={chartConfig}
-            accessor="population"
-            backgroundColor="transparent"
-            paddingLeft="15"
-            absolute
-            style={{
-              marginVertical: 8,
-              borderRadius: 12,
-            }}
-          />
-        );
-      case "bar":
-        return (
-          <BarChart
-            data={{
-              labels: ["一", "二", "三", "四", "五", "六", "日"],
-              datasets: [
-                {
-                  data: [3, 2, 4, 3, 2, 3, 2],
-                },
-              ],
-            }}
-            width={screenWidth}
-            height={180}
-            chartConfig={{
-              ...chartConfig,
-              barPercentage: 0.5,
-            }}
-            style={{
-              marginVertical: 8,
-              borderRadius: 12,
-            }}
-            showValuesOnTopOfBars
-            fromZero
-            yAxisLabel=""
-            yAxisSuffix=""
-          />
-        );
-      default:
-        return null;
-    }
   };
 
   return (

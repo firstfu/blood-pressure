@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, Dimensions } from "react-native";
+// @ts-ignore
 import { LineChart } from "react-native-gifted-charts";
 import { TrendDataPoint } from "../../types/bloodPressure";
 
@@ -19,16 +20,16 @@ export const BloodPressureTrendChart: React.FC<Props> = ({ data, onPointPress })
   // 將數據轉換為圖表所需的格式
   const systolicData = data.map(point => ({
     value: point.systolic,
-    date: new Date(point.timestamp),
     label: new Date(point.timestamp).toLocaleDateString("zh-TW", { month: "short", day: "numeric" }),
     dataPointText: point.systolic.toString(),
+    topLabelComponent: () => <Text style={{ color: "#7F3DFF", fontSize: 10 }}>{point.systolic}</Text>,
   }));
 
   const diastolicData = data.map(point => ({
     value: point.diastolic,
-    date: new Date(point.timestamp),
     label: new Date(point.timestamp).toLocaleDateString("zh-TW", { month: "short", day: "numeric" }),
     dataPointText: point.diastolic.toString(),
+    topLabelComponent: () => <Text style={{ color: "#5D5FEF", fontSize: 10 }}>{point.diastolic}</Text>,
   }));
 
   // 定義血壓正常範圍的背景區域
@@ -39,6 +40,7 @@ export const BloodPressureTrendChart: React.FC<Props> = ({ data, onPointPress })
 
   return (
     <View style={styles.container}>
+      {/* @ts-ignore */}
       <LineChart
         areaChart
         data={systolicData}
@@ -63,14 +65,32 @@ export const BloodPressureTrendChart: React.FC<Props> = ({ data, onPointPress })
         yAxisTextStyle={styles.yAxisText}
         xAxisLabelTextStyle={styles.xAxisText}
         noOfSections={6}
-        maxValue={180}
-        minValue={40}
+        maxHeight={180}
         yAxisLabelSuffix=" mmHg"
-        renderTooltip={(item: ChartDataPoint) => (
-          <View style={styles.tooltip}>
-            <Text style={styles.tooltipText}>{item.dataPointText} mmHg</Text>
-          </View>
-        )}
+        onPress={item => {
+          if (onPointPress && item) {
+            const point = data.find(p => p.systolic === item.value || p.diastolic === item.value);
+            if (point) {
+              onPointPress(point);
+            }
+          }
+        }}
+        pointerConfig={{
+          pointerStripHeight: 160,
+          pointerStripColor: "rgba(0,0,0,0.1)",
+          pointerStripWidth: 2,
+          pointerColor: "#7F3DFF",
+          radius: 6,
+          pointerLabelWidth: 100,
+          pointerLabelHeight: 40,
+          activatePointersOnLongPress: true,
+          autoAdjustPointerLabelPosition: true,
+          pointerLabelComponent: item => (
+            <View style={styles.tooltip}>
+              <Text style={styles.tooltipText}>{item.value} mmHg</Text>
+            </View>
+          ),
+        }}
       />
     </View>
   );
