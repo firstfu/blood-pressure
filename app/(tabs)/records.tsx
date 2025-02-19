@@ -21,6 +21,18 @@ interface EditModalProps {
   onSave: (record: BloodPressureRecord) => void;
 }
 
+interface AdvancedFilter {
+  dateRange: {
+    start: string;
+    end: string;
+  };
+  bloodPressure: {
+    systolic: { min: number; max: number };
+    diastolic: { min: number; max: number };
+  };
+  heartRate: { min: number; max: number };
+}
+
 function EditModal({ visible, record, onClose, onSave }: EditModalProps) {
   const [editedRecord, setEditedRecord] = useState<BloodPressureRecord | null>(record);
 
@@ -133,26 +145,136 @@ export default function RecordsScreen() {
       date: "2024-03-19",
       time: "09:30",
     },
+    {
+      id: "4",
+      systolic: 142,
+      diastolic: 88,
+      heartRate: 82,
+      date: "2024-03-19",
+      time: "21:30",
+      note: "運動後量測",
+    },
+    {
+      id: "5",
+      systolic: 135,
+      diastolic: 85,
+      heartRate: 76,
+      date: "2024-03-18",
+      time: "09:30",
+      note: "感覺有點緊張",
+    },
   ]);
 
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<BloodPressureRecord | null>(null);
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchModalVisible, setSearchModalVisible] = useState(false);
-  const [filterModalVisible, setFilterModalVisible] = useState(false);
-  const [addModalVisible, setAddModalVisible] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const [advancedFilterModalVisible, setAdvancedFilterModalVisible] = useState(false);
+  const [advancedFilter, setAdvancedFilter] = useState<AdvancedFilter>({
+    dateRange: {
+      start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+      end: new Date().toISOString().split("T")[0],
+    },
+    bloodPressure: {
+      systolic: { min: 0, max: 300 },
+      diastolic: { min: 0, max: 200 },
+    },
+    heartRate: { min: 0, max: 200 },
+  });
+
+  // 篩選記錄
+  const getFilteredRecords = () => {
+    const now = new Date();
+    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    let filteredRecords = [...records];
+
+    // 進階篩選
+    filteredRecords = filteredRecords.filter(record => {
+      const recordDate = new Date(record.date);
+      const startDate = new Date(advancedFilter.dateRange.start);
+      const endDate = new Date(advancedFilter.dateRange.end);
+
+      return (
+        recordDate >= startDate &&
+        recordDate <= endDate &&
+        record.systolic >= advancedFilter.bloodPressure.systolic.min &&
+        record.systolic <= advancedFilter.bloodPressure.systolic.max &&
+        record.diastolic >= advancedFilter.bloodPressure.diastolic.min &&
+        record.diastolic <= advancedFilter.bloodPressure.diastolic.max &&
+        record.heartRate >= advancedFilter.heartRate.min &&
+        record.heartRate <= advancedFilter.heartRate.max
+      );
+    });
+
+    // 搜尋過濾
+    if (searchText) {
+      filteredRecords = filteredRecords.filter(
+        record =>
+          record.note?.toLowerCase().includes(searchText.toLowerCase()) ||
+          record.date.includes(searchText) ||
+          record.time.includes(searchText) ||
+          String(record.systolic).includes(searchText) ||
+          String(record.diastolic).includes(searchText) ||
+          String(record.heartRate).includes(searchText)
+      );
+    }
+
+    // 時間和狀態過濾
+    switch (activeFilter) {
+      case "week":
+        return filteredRecords.filter(record => new Date(record.date) >= oneWeekAgo);
+      case "month":
+        return filteredRecords.filter(record => new Date(record.date) >= oneMonthAgo);
+      case "abnormal":
+        return filteredRecords.filter(record => record.systolic >= 140 || record.diastolic >= 90);
+      default:
+        return filteredRecords;
+    }
+  };
 
   const handleFilterPress = (filter: string) => {
     setActiveFilter(filter);
-    // TODO: 實現篩選邏輯
   };
 
   const handleSearchPress = () => {
-    Alert.alert("搜尋", "搜尋功能開發中");
+    setSearchModalVisible(true);
   };
 
+  // 搜尋 Modal
+  const SearchModal = () => (
+    <Modal visible={searchModalVisible} animationType="slide" transparent onRequestClose={() => setSearchModalVisible(false)}>
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>搜尋記錄</Text>
+            <Pressable style={({ pressed }) => [styles.modalCloseButton, pressed && { opacity: 0.8 }]} onPress={() => setSearchModalVisible(false)}>
+              <FontAwesome5 name="times" size={20} color="#8e8e93" />
+            </Pressable>
+          </View>
+          <View style={styles.searchContainer}>
+            <View style={styles.searchInputContainer}>
+              <FontAwesome name="search" size={16} color="#8e8e93" style={styles.searchIcon} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="搜尋日期、時間、備註..."
+                value={searchText}
+                onChangeText={setSearchText}
+                autoFocus
+                clearButtonMode="while-editing"
+              />
+            </View>
+            {searchText ? <Text style={styles.searchResult}>找到 {getFilteredRecords().length} 筆結果</Text> : null}
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+
   const handleAdvancedFilterPress = () => {
-    Alert.alert("進階篩選", "進階篩選功能開發中");
+    setAdvancedFilterModalVisible(true);
   };
 
   const handleAddPress = () => {
@@ -211,6 +333,187 @@ export default function RecordsScreen() {
     });
   };
 
+  // 進階篩選 Modal
+  const AdvancedFilterModal = () => (
+    <Modal visible={advancedFilterModalVisible} animationType="slide" transparent onRequestClose={() => setAdvancedFilterModalVisible(false)}>
+      <View style={styles.modalOverlay}>
+        <View style={[styles.modalContent, { maxHeight: "80%" }]}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>進階篩選</Text>
+            <Pressable style={({ pressed }) => [styles.modalCloseButton, pressed && { opacity: 0.8 }]} onPress={() => setAdvancedFilterModalVisible(false)}>
+              <FontAwesome5 name="times" size={20} color="#8e8e93" />
+            </Pressable>
+          </View>
+
+          <ScrollView style={styles.modalBody}>
+            {/* 日期範圍 */}
+            <View style={styles.filterSection}>
+              <Text style={styles.filterSectionTitle}>日期範圍</Text>
+              <View style={styles.dateRangeContainer}>
+                <View style={styles.dateInputGroup}>
+                  <Text style={styles.inputLabel}>開始日期</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={advancedFilter.dateRange.start}
+                    onChangeText={text =>
+                      setAdvancedFilter(prev => ({
+                        ...prev,
+                        dateRange: { ...prev.dateRange, start: text },
+                      }))
+                    }
+                    placeholder="YYYY-MM-DD"
+                  />
+                </View>
+                <View style={styles.dateInputGroup}>
+                  <Text style={styles.inputLabel}>結束日期</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={advancedFilter.dateRange.end}
+                    onChangeText={text =>
+                      setAdvancedFilter(prev => ({
+                        ...prev,
+                        dateRange: { ...prev.dateRange, end: text },
+                      }))
+                    }
+                    placeholder="YYYY-MM-DD"
+                  />
+                </View>
+              </View>
+            </View>
+
+            {/* 血壓範圍 */}
+            <View style={styles.filterSection}>
+              <Text style={styles.filterSectionTitle}>血壓範圍</Text>
+              <View style={styles.rangeContainer}>
+                <View style={styles.rangeInputGroup}>
+                  <Text style={styles.inputLabel}>收縮壓 (mmHg)</Text>
+                  <View style={styles.rangeInputs}>
+                    <TextInput
+                      style={[styles.input, styles.rangeInput]}
+                      value={String(advancedFilter.bloodPressure.systolic.min)}
+                      onChangeText={text =>
+                        setAdvancedFilter(prev => ({
+                          ...prev,
+                          bloodPressure: {
+                            ...prev.bloodPressure,
+                            systolic: { ...prev.bloodPressure.systolic, min: Number(text) || 0 },
+                          },
+                        }))
+                      }
+                      keyboardType="number-pad"
+                      placeholder="最小值"
+                    />
+                    <Text style={styles.rangeSeparator}>-</Text>
+                    <TextInput
+                      style={[styles.input, styles.rangeInput]}
+                      value={String(advancedFilter.bloodPressure.systolic.max)}
+                      onChangeText={text =>
+                        setAdvancedFilter(prev => ({
+                          ...prev,
+                          bloodPressure: {
+                            ...prev.bloodPressure,
+                            systolic: { ...prev.bloodPressure.systolic, max: Number(text) || 0 },
+                          },
+                        }))
+                      }
+                      keyboardType="number-pad"
+                      placeholder="最大值"
+                    />
+                  </View>
+                </View>
+
+                <View style={styles.rangeInputGroup}>
+                  <Text style={styles.inputLabel}>舒張壓 (mmHg)</Text>
+                  <View style={styles.rangeInputs}>
+                    <TextInput
+                      style={[styles.input, styles.rangeInput]}
+                      value={String(advancedFilter.bloodPressure.diastolic.min)}
+                      onChangeText={text =>
+                        setAdvancedFilter(prev => ({
+                          ...prev,
+                          bloodPressure: {
+                            ...prev.bloodPressure,
+                            diastolic: { ...prev.bloodPressure.diastolic, min: Number(text) || 0 },
+                          },
+                        }))
+                      }
+                      keyboardType="number-pad"
+                      placeholder="最小值"
+                    />
+                    <Text style={styles.rangeSeparator}>-</Text>
+                    <TextInput
+                      style={[styles.input, styles.rangeInput]}
+                      value={String(advancedFilter.bloodPressure.diastolic.max)}
+                      onChangeText={text =>
+                        setAdvancedFilter(prev => ({
+                          ...prev,
+                          bloodPressure: {
+                            ...prev.bloodPressure,
+                            diastolic: { ...prev.bloodPressure.diastolic, max: Number(text) || 0 },
+                          },
+                        }))
+                      }
+                      keyboardType="number-pad"
+                      placeholder="最大值"
+                    />
+                  </View>
+                </View>
+              </View>
+            </View>
+
+            {/* 心率範圍 */}
+            <View style={styles.filterSection}>
+              <Text style={styles.filterSectionTitle}>心率範圍 (BPM)</Text>
+              <View style={styles.rangeInputs}>
+                <TextInput
+                  style={[styles.input, styles.rangeInput]}
+                  value={String(advancedFilter.heartRate.min)}
+                  onChangeText={text =>
+                    setAdvancedFilter(prev => ({
+                      ...prev,
+                      heartRate: { ...prev.heartRate, min: Number(text) || 0 },
+                    }))
+                  }
+                  keyboardType="number-pad"
+                  placeholder="最小值"
+                />
+                <Text style={styles.rangeSeparator}>-</Text>
+                <TextInput
+                  style={[styles.input, styles.rangeInput]}
+                  value={String(advancedFilter.heartRate.max)}
+                  onChangeText={text =>
+                    setAdvancedFilter(prev => ({
+                      ...prev,
+                      heartRate: { ...prev.heartRate, max: Number(text) || 0 },
+                    }))
+                  }
+                  keyboardType="number-pad"
+                  placeholder="最大值"
+                />
+              </View>
+            </View>
+          </ScrollView>
+
+          <View style={styles.modalFooter}>
+            <Pressable style={[styles.modalButton, styles.modalCancelButton]} onPress={() => setAdvancedFilterModalVisible(false)}>
+              <Text style={styles.modalButtonText}>取消</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.modalButton, styles.modalSaveButton]}
+              onPress={() => {
+                setAdvancedFilterModalVisible(false);
+                // 重新篩選記錄
+                getFilteredRecords();
+              }}
+            >
+              <Text style={[styles.modalButtonText, styles.modalSaveButtonText]}>套用</Text>
+            </Pressable>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
@@ -253,16 +556,15 @@ export default function RecordsScreen() {
             </View>
           </ScrollView>
 
-          {/* 記錄列表 */}
           <View style={styles.recordsList}>
-            {records.length === 0 ? (
+            {getFilteredRecords().length === 0 ? (
               <View style={styles.emptyState}>
                 <FontAwesome5 name="notes-medical" size={48} color="#8e8e93" />
-                <Text style={styles.emptyStateText}>尚無記錄</Text>
-                <Text style={styles.emptyStateSubtext}>點擊右下角按鈕新增記錄</Text>
+                <Text style={styles.emptyStateText}>{searchText ? "沒有符合的搜尋結果" : "尚無記錄"}</Text>
+                <Text style={styles.emptyStateSubtext}>{searchText ? "請嘗試其他搜尋條件" : "點擊右下角按鈕新增記錄"}</Text>
               </View>
             ) : (
-              records.map((record, index) => (
+              getFilteredRecords().map((record, index) => (
                 <Pressable key={record.id} style={({ pressed }) => [styles.recordCardContainer, pressed && styles.recordCardPressed]} onPress={() => handleEdit(record)}>
                   <MotiView
                     style={styles.recordCard}
@@ -313,6 +615,8 @@ export default function RecordsScreen() {
         </ScrollView>
       </View>
 
+      <SearchModal />
+      <AdvancedFilterModal />
       <EditModal
         visible={editModalVisible}
         record={selectedRecord}
@@ -340,10 +644,11 @@ const styles = StyleSheet.create({
   headerContainer: {
     width: "100%",
     backgroundColor: "#2d87ff",
-    paddingTop: Platform.OS === "android" ? 20 : 0,
+    paddingTop: Platform.OS === "android" ? 40 : 0,
   },
   headerGradient: {
     width: "100%",
+    paddingTop: Platform.OS === "ios" ? 50 : 0,
   },
   header: {
     flexDirection: "row",
@@ -351,8 +656,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    height: Platform.OS === "android" ? 64 : 56,
-    paddingTop: Platform.OS === "android" ? 12 : 8,
+    height: Platform.OS === "android" ? 80 : 72,
+    paddingTop: Platform.OS === "ios" ? 8 : 0,
   },
   headerContent: {
     flex: 1,
@@ -370,6 +675,7 @@ const styles = StyleSheet.create({
   headerButtons: {
     flexDirection: "row",
     gap: 12,
+    alignItems: "center",
   },
   iconButton: {
     width: 40,
@@ -391,10 +697,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f7fa",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    paddingTop: 12,
+    marginTop: 0,
+    paddingTop: 16,
   },
   filterScroll: {
     marginBottom: 20,
+    paddingTop: 8,
   },
   filterContainer: {
     flexDirection: "row",
@@ -406,6 +714,9 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 20,
     backgroundColor: "rgba(142,142,147,0.1)",
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
   },
   filterButtonActive: {
     backgroundColor: "#2d87ff",
@@ -640,5 +951,65 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#8e8e93",
     marginTop: 8,
+  },
+  searchContainer: {
+    padding: 16,
+  },
+  searchInputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f5f7fa",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    height: 44,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: "#1c1c1e",
+    height: "100%",
+  },
+  searchResult: {
+    fontSize: 14,
+    color: "#8e8e93",
+    marginTop: 12,
+    textAlign: "center",
+  },
+  filterSection: {
+    marginBottom: 24,
+  },
+  filterSectionTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1c1c1e",
+    marginBottom: 12,
+  },
+  dateRangeContainer: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  dateInputGroup: {
+    flex: 1,
+  },
+  rangeContainer: {
+    gap: 16,
+  },
+  rangeInputGroup: {
+    gap: 8,
+  },
+  rangeInputs: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  rangeInput: {
+    flex: 1,
+  },
+  rangeSeparator: {
+    fontSize: 16,
+    color: "#8e8e93",
   },
 });
