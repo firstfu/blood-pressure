@@ -119,12 +119,13 @@ function EditModal({ visible, record, onClose, onSave }: EditModalProps) {
 
 export default function RecordsScreen() {
   const [records, setRecords] = useState<BloodPressureRecord[]>([
+    // 本週資料（假設今天是 2024-03-24）
     {
       id: "1",
       systolic: 120,
       diastolic: 80,
       heartRate: 75,
-      date: "2024-03-20",
+      date: "2024-03-24",
       time: "09:30",
       note: "早晨量測",
     },
@@ -133,35 +134,263 @@ export default function RecordsScreen() {
       systolic: 118,
       diastolic: 78,
       heartRate: 72,
-      date: "2024-03-20",
+      date: "2024-03-24",
       time: "21:30",
       note: "睡前量測",
     },
     {
       id: "3",
-      systolic: 125,
+      systolic: 122,
       diastolic: 82,
-      heartRate: 78,
-      date: "2024-03-19",
+      heartRate: 76,
+      date: "2024-03-23",
       time: "09:30",
+      note: "運動前量測",
     },
     {
       id: "4",
-      systolic: 142,
+      systolic: 135,
       diastolic: 88,
       heartRate: 82,
-      date: "2024-03-19",
+      date: "2024-03-23",
       time: "21:30",
       note: "運動後量測",
     },
     {
       id: "5",
-      systolic: 135,
+      systolic: 125,
       diastolic: 85,
-      heartRate: 76,
-      date: "2024-03-18",
+      heartRate: 74,
+      date: "2024-03-22",
       time: "09:30",
-      note: "感覺有點緊張",
+      note: "正常量測",
+    },
+    {
+      id: "6",
+      systolic: 145,
+      diastolic: 95,
+      heartRate: 88,
+      date: "2024-03-22",
+      time: "21:30",
+      note: "工作壓力大",
+    },
+    {
+      id: "7",
+      systolic: 128,
+      diastolic: 84,
+      heartRate: 76,
+      date: "2024-03-21",
+      time: "09:30",
+      note: "早晨散步後",
+    },
+    {
+      id: "8",
+      systolic: 132,
+      diastolic: 86,
+      heartRate: 78,
+      date: "2024-03-21",
+      time: "21:30",
+      note: "晚餐後量測",
+    },
+    {
+      id: "9",
+      systolic: 115,
+      diastolic: 75,
+      heartRate: 68,
+      date: "2024-03-20",
+      time: "09:30",
+      note: "休息充足",
+    },
+    {
+      id: "10",
+      systolic: 138,
+      diastolic: 88,
+      heartRate: 82,
+      date: "2024-03-20",
+      time: "21:30",
+      note: "咖啡因攝入過多",
+    },
+    // 本月較早資料
+    {
+      id: "11",
+      systolic: 142,
+      diastolic: 92,
+      heartRate: 86,
+      date: "2024-03-15",
+      time: "09:30",
+      note: "感冒症狀",
+    },
+    {
+      id: "12",
+      systolic: 136,
+      diastolic: 88,
+      heartRate: 80,
+      date: "2024-03-15",
+      time: "21:30",
+      note: "服藥後量測",
+    },
+    {
+      id: "13",
+      systolic: 130,
+      diastolic: 85,
+      heartRate: 75,
+      date: "2024-03-10",
+      time: "09:30",
+      note: "正常量測",
+    },
+    {
+      id: "14",
+      systolic: 128,
+      diastolic: 84,
+      heartRate: 74,
+      date: "2024-03-10",
+      time: "21:30",
+      note: "睡前量測",
+    },
+    {
+      id: "15",
+      systolic: 144,
+      diastolic: 94,
+      heartRate: 88,
+      date: "2024-03-05",
+      time: "09:30",
+      note: "壓力大",
+    },
+    {
+      id: "16",
+      systolic: 134,
+      diastolic: 86,
+      heartRate: 78,
+      date: "2024-03-05",
+      time: "21:30",
+      note: "放鬆後量測",
+    },
+    {
+      id: "17",
+      systolic: 126,
+      diastolic: 82,
+      heartRate: 72,
+      date: "2024-03-01",
+      time: "09:30",
+      note: "月初量測",
+    },
+    {
+      id: "18",
+      systolic: 124,
+      diastolic: 80,
+      heartRate: 70,
+      date: "2024-03-01",
+      time: "21:30",
+      note: "正常量測",
+    },
+    // 上月資料
+    {
+      id: "19",
+      systolic: 146,
+      diastolic: 96,
+      heartRate: 90,
+      date: "2024-02-28",
+      time: "09:30",
+      note: "上月異常值",
+    },
+    {
+      id: "20",
+      systolic: 138,
+      diastolic: 88,
+      heartRate: 82,
+      date: "2024-02-28",
+      time: "21:30",
+      note: "觀察中",
+    },
+    {
+      id: "21",
+      systolic: 132,
+      diastolic: 86,
+      heartRate: 76,
+      date: "2024-02-25",
+      time: "09:30",
+      note: "正常量測",
+    },
+    {
+      id: "22",
+      systolic: 128,
+      diastolic: 84,
+      heartRate: 74,
+      date: "2024-02-25",
+      time: "21:30",
+      note: "睡前量測",
+    },
+    {
+      id: "23",
+      systolic: 148,
+      diastolic: 98,
+      heartRate: 92,
+      date: "2024-02-20",
+      time: "09:30",
+      note: "異常高壓",
+    },
+    {
+      id: "24",
+      systolic: 140,
+      diastolic: 90,
+      heartRate: 84,
+      date: "2024-02-20",
+      time: "21:30",
+      note: "需要追蹤",
+    },
+    {
+      id: "25",
+      systolic: 134,
+      diastolic: 86,
+      heartRate: 78,
+      date: "2024-02-15",
+      time: "09:30",
+      note: "例行量測",
+    },
+    {
+      id: "26",
+      systolic: 130,
+      diastolic: 84,
+      heartRate: 76,
+      date: "2024-02-15",
+      time: "21:30",
+      note: "正常範圍",
+    },
+    {
+      id: "27",
+      systolic: 142,
+      diastolic: 92,
+      heartRate: 86,
+      date: "2024-02-10",
+      time: "09:30",
+      note: "稍微偏高",
+    },
+    {
+      id: "28",
+      systolic: 136,
+      diastolic: 88,
+      heartRate: 80,
+      date: "2024-02-10",
+      time: "21:30",
+      note: "持續觀察",
+    },
+    {
+      id: "29",
+      systolic: 126,
+      diastolic: 82,
+      heartRate: 72,
+      date: "2024-02-05",
+      time: "09:30",
+      note: "正常量測",
+    },
+    {
+      id: "30",
+      systolic: 124,
+      diastolic: 80,
+      heartRate: 70,
+      date: "2024-02-05",
+      time: "21:30",
+      note: "睡前量測",
     },
   ]);
 
@@ -173,7 +402,7 @@ export default function RecordsScreen() {
   const [advancedFilterModalVisible, setAdvancedFilterModalVisible] = useState(false);
   const [advancedFilter, setAdvancedFilter] = useState<AdvancedFilter>({
     dateRange: {
-      start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+      start: "2024-01-01",
       end: new Date().toISOString().split("T")[0],
     },
     bloodPressure: {
@@ -190,6 +419,7 @@ export default function RecordsScreen() {
     const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
     let filteredRecords = [...records];
+    console.log("Initial records:", filteredRecords.length);
 
     // 進階篩選
     filteredRecords = filteredRecords.filter(record => {
@@ -197,17 +427,28 @@ export default function RecordsScreen() {
       const startDate = new Date(advancedFilter.dateRange.start);
       const endDate = new Date(advancedFilter.dateRange.end);
 
-      return (
-        recordDate >= startDate &&
-        recordDate <= endDate &&
-        record.systolic >= advancedFilter.bloodPressure.systolic.min &&
-        record.systolic <= advancedFilter.bloodPressure.systolic.max &&
-        record.diastolic >= advancedFilter.bloodPressure.diastolic.min &&
-        record.diastolic <= advancedFilter.bloodPressure.diastolic.max &&
-        record.heartRate >= advancedFilter.heartRate.min &&
-        record.heartRate <= advancedFilter.heartRate.max
-      );
+      // 重設時間部分以確保純日期比較
+      recordDate.setHours(0, 0, 0, 0);
+      startDate.setHours(0, 0, 0, 0);
+      endDate.setHours(0, 0, 0, 0);
+
+      const dateInRange = recordDate >= startDate && recordDate <= endDate;
+
+      console.log("Date comparison:", {
+        recordDate: recordDate.toISOString(),
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        dateInRange,
+      });
+
+      const systolicInRange = record.systolic >= advancedFilter.bloodPressure.systolic.min && record.systolic <= advancedFilter.bloodPressure.systolic.max;
+      const diastolicInRange = record.diastolic >= advancedFilter.bloodPressure.diastolic.min && record.diastolic <= advancedFilter.bloodPressure.diastolic.max;
+      const heartRateInRange = record.heartRate >= advancedFilter.heartRate.min && record.heartRate <= advancedFilter.heartRate.max;
+
+      return dateInRange && systolicInRange && diastolicInRange && heartRateInRange;
     });
+
+    console.log("After advanced filter:", filteredRecords.length);
 
     // 搜尋過濾
     if (searchText) {
@@ -220,17 +461,26 @@ export default function RecordsScreen() {
           String(record.diastolic).includes(searchText) ||
           String(record.heartRate).includes(searchText)
       );
+      console.log("After search filter:", filteredRecords.length);
     }
 
     // 時間和狀態過濾
+    let result;
     switch (activeFilter) {
       case "week":
-        return filteredRecords.filter(record => new Date(record.date) >= oneWeekAgo);
+        result = filteredRecords.filter(record => new Date(record.date) >= oneWeekAgo);
+        console.log("Week filter applied:", result.length);
+        return result;
       case "month":
-        return filteredRecords.filter(record => new Date(record.date) >= oneMonthAgo);
+        result = filteredRecords.filter(record => new Date(record.date) >= oneMonthAgo);
+        console.log("Month filter applied:", result.length);
+        return result;
       case "abnormal":
-        return filteredRecords.filter(record => record.systolic >= 140 || record.diastolic >= 90);
+        result = filteredRecords.filter(record => record.systolic >= 140 || record.diastolic >= 90);
+        console.log("Abnormal filter applied:", result.length);
+        return result;
       default:
+        console.log("No time filter applied, returning:", filteredRecords.length);
         return filteredRecords;
     }
   };
@@ -542,7 +792,7 @@ export default function RecordsScreen() {
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
             <View style={styles.filterContainer}>
               <Pressable style={[styles.filterButton, activeFilter === "all" && styles.filterButtonActive]} onPress={() => handleFilterPress("all")}>
-                <Text style={[styles.filterButtonText, activeFilter === "all" && styles.filterButtonTextActive]}>全部記錄</Text>
+                <Text style={[styles.filterButtonText, activeFilter === "all" && styles.filterButtonTextActive]}>全部3記錄</Text>
               </Pressable>
               <Pressable style={[styles.filterButton, activeFilter === "week" && styles.filterButtonActive]} onPress={() => handleFilterPress("week")}>
                 <Text style={[styles.filterButtonText, activeFilter === "week" && styles.filterButtonTextActive]}>本週</Text>
@@ -557,7 +807,7 @@ export default function RecordsScreen() {
           </ScrollView>
 
           <View style={styles.recordsList}>
-            {getFilteredRecords().length === 0 ? (
+            {getFilteredRecords().length == 0 ? (
               <View style={styles.emptyState}>
                 <FontAwesome5 name="notes-medical" size={48} color="#8e8e93" />
                 <Text style={styles.emptyStateText}>{searchText ? "沒有符合的搜尋結果" : "尚無記錄"}</Text>
