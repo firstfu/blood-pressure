@@ -141,105 +141,73 @@ export default function HomeScreen() {
 
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent} showsVerticalScrollIndicator={false}>
         <MotiView from={{ translateY: 50, opacity: 0 }} animate={{ translateY: 0, opacity: 1 }} transition={{ type: "timing", duration: 800 }} style={styles.mainContent}>
-          {/* 今日數據概覽卡片 */}
-          <View style={styles.overviewCard}>
+          {/* 最新記錄卡片 */}
+          <View style={styles.latestRecordCard}>
             <LinearGradient colors={["#ffffff", "#F9F5FF"]} style={styles.cardGradient}>
-              <View style={styles.cardHeader}>
-                <View style={styles.cardTitleContainer}>
-                  <View style={[styles.cardTitleIcon, { backgroundColor: "rgba(127,61,255,0.1)" }]}>
-                    <FontAwesome5 name="heartbeat" size={14} color="#7F3DFF" />
-                  </View>
-                  <Text style={[styles.cardTitle, { color: "#7F3DFF" }]}>今日數據</Text>
+              <View style={styles.latestRecordHeader}>
+                <View style={styles.latestRecordIcon}>
+                  <FontAwesome5 name="heart" size={16} color="#7F3DFF" />
                 </View>
-                <View style={styles.timeInfo}>
-                  <FontAwesome5 name="clock" size={12} color="#8e8e93" />
-                  <Text style={styles.timeText}>最後更新: 10:30</Text>
-                </View>
+                <Text style={styles.latestRecordTitle}>最新記錄</Text>
+                <Text style={styles.latestRecordTime}>今天 15:32</Text>
               </View>
 
-              <View style={styles.bloodPressureDisplay}>
-                <View style={styles.bpReadingContainer}>
-                  <View style={styles.bpReading}>
-                    <Text style={styles.bpValue}>120</Text>
-                    <Text style={styles.bpUnit}>mmHg</Text>
-                  </View>
+              <View style={styles.bpReadingsContainer}>
+                <View style={styles.bpReadingItem}>
                   <Text style={styles.bpLabel}>收縮壓</Text>
-                </View>
-                <View style={styles.bpDivider} />
-                <View style={styles.bpReadingContainer}>
-                  <View style={styles.bpReading}>
-                    <Text style={styles.bpValue}>80</Text>
+                  <View style={styles.bpValueContainer}>
+                    <Text style={[styles.bpValue, { color: "#7F3DFF" }]}>120</Text>
                     <Text style={styles.bpUnit}>mmHg</Text>
                   </View>
+                </View>
+
+                <View style={styles.bpReadingItem}>
                   <Text style={styles.bpLabel}>舒張壓</Text>
-                </View>
-                <View style={styles.bpReadingContainer}>
-                  <View style={styles.bpReading}>
-                    <Text style={styles.bpValue}>75</Text>
-                    <Text style={styles.bpUnit}>bpm</Text>
+                  <View style={styles.bpValueContainer}>
+                    <Text style={[styles.bpValue, { color: "#5D5FEF" }]}>80</Text>
+                    <Text style={styles.bpUnit}>mmHg</Text>
                   </View>
+                </View>
+
+                <View style={styles.bpReadingItem}>
                   <Text style={styles.bpLabel}>心率</Text>
+                  <View style={styles.bpValueContainer}>
+                    <Text style={[styles.bpValue, { color: "#34C759" }]}>75</Text>
+                    <Text style={styles.bpUnit}>BPM</Text>
+                  </View>
                 </View>
               </View>
 
-              <View style={styles.statusContainer}>
-                <View style={styles.statusBadge}>
-                  <FontAwesome5 name="check-circle" size={14} color="#34c759" solid />
-                  <Text style={styles.statusText}>血壓正常</Text>
+              <View style={styles.bpStatusContainer}>
+                <View style={styles.bpStatusBar}>
+                  <LinearGradient colors={["#34C759", "#34C759"]} style={[styles.bpStatusIndicator, { width: "30%" }]} start={[0, 0]} end={[1, 0]} />
                 </View>
+                <Text style={styles.bpStatusText}>正常</Text>
+                <Text style={styles.bpRangeText}>收縮壓 90-119 且舒張壓 60-79</Text>
               </View>
             </LinearGradient>
           </View>
 
-          {/* 血壓趨勢卡片 */}
-          <View style={styles.trendCard}>
-            <LinearGradient colors={["#ffffff", "#F9F5FF"]} style={styles.cardGradient}>
-              <View style={styles.cardHeader}>
-                <View style={styles.cardTitleContainer}>
-                  <View style={[styles.cardTitleIcon, { backgroundColor: "rgba(127,61,255,0.1)" }]}>
-                    <FontAwesome5 name="chart-line" size={14} color="#7F3DFF" />
-                  </View>
-                  <Text style={[styles.cardTitle, { color: "#7F3DFF" }]}>血壓趨勢</Text>
-                </View>
-                <Pressable style={({ pressed }) => [styles.moreButton, { backgroundColor: pressed ? "rgba(127,61,255,0.2)" : "rgba(127,61,255,0.1)" }]} onPress={handleViewDetails}>
-                  <Text style={[styles.moreButtonText, { color: "#7F3DFF" }]}>查看詳情</Text>
-                  <FontAwesome5 name="chevron-right" size={12} color="#7F3DFF" />
-                </Pressable>
+          {/* 功能按鈕區 */}
+          <View style={styles.actionButtonsContainer}>
+            <Pressable style={styles.actionButton} onPress={() => router.push("/records")}>
+              <View style={[styles.actionButtonIcon, { backgroundColor: "rgba(52,199,89,0.1)" }]}>
+                <FontAwesome5 name="camera" size={20} color="#34C759" />
               </View>
+              <Text style={styles.actionButtonText}>拍照識別</Text>
+              <Text style={styles.actionButtonSubtext}>快速輸入</Text>
+            </Pressable>
 
-              <View style={styles.periodSelectorContainer}>
-                <TimePeriodSelector selectedPeriod={selectedPeriod} onPeriodChange={handlePeriodChange} />
+            <Pressable style={styles.actionButton} onPress={() => router.push("/statistics")}>
+              <View style={[styles.actionButtonIcon, { backgroundColor: "rgba(255,159,64,0.1)" }]}>
+                <FontAwesome5 name="chart-line" size={20} color="#FF9F40" />
               </View>
-              <View style={styles.chartContainer}>
-                <BloodPressureTrendChart data={trendState.data} period={selectedPeriod} onPointPress={handlePointPress} />
-              </View>
-            </LinearGradient>
+              <Text style={styles.actionButtonText}>血壓趨勢</Text>
+              <Text style={styles.actionButtonSubtext}>查看分析</Text>
+            </Pressable>
           </View>
 
-          {/* 快速記錄提示卡片 */}
-          <Pressable onPress={handleQuickRecord}>
-            <MotiView style={styles.quickRecordCard} from={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", delay: 600 }}>
-              <LinearGradient colors={["#7F3DFF", "#5D5FEF"]} start={[0, 0]} end={[1, 1]} style={styles.quickRecordGradient}>
-                <View style={styles.quickRecordHeader}>
-                  <View style={styles.quickRecordTitle}>
-                    <FontAwesome5 name="plus-circle" size={20} color="#fff" />
-                    <Text style={styles.quickRecordTitleText}>立即記錄血壓</Text>
-                  </View>
-                  <FontAwesome5 name="chevron-right" size={16} color="rgba(255,255,255,0.8)" />
-                </View>
-                <View style={styles.quickRecordHint}>
-                  <Pressable style={styles.quickRecordHintItem} onPress={handleQuickRecord}>
-                    <FontAwesome5 name="clock" size={12} color="rgba(255,255,255,0.8)" />
-                    <Text style={styles.quickRecordHintText}>快速記錄只需30秒</Text>
-                  </Pressable>
-                  <Pressable style={styles.quickRecordHintItem} onPress={handleHealthTracking}>
-                    <FontAwesome5 name="chart-line" size={12} color="rgba(255,255,255,0.8)" />
-                    <Text style={styles.quickRecordHintText}>追蹤健康變化</Text>
-                  </Pressable>
-                </View>
-              </LinearGradient>
-            </MotiView>
-          </Pressable>
+          {/* 血壓趨勢圖表 */}
         </MotiView>
       </ScrollView>
 
@@ -350,11 +318,11 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 24,
     marginTop: -24,
     paddingTop: 32,
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingBottom: 40,
   },
-  overviewCard: {
-    borderRadius: 24,
+  latestRecordCard: {
+    borderRadius: 20,
     overflow: "hidden",
     backgroundColor: "#fff",
     marginBottom: 16,
@@ -371,104 +339,93 @@ const styles = StyleSheet.create({
     }),
   },
   cardGradient: {
-    padding: 20,
+    padding: 24,
   },
-  cardHeader: {
+  latestRecordHeader: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 20,
   },
-  cardTitleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  cardTitleIcon: {
+  latestRecordIcon: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "rgba(45,135,255,0.1)",
+    backgroundColor: "rgba(127,61,255,0.1)",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
   },
-  cardTitle: {
+  latestRecordTitle: {
     fontSize: 18,
     fontWeight: "600",
     color: "#1c1c1e",
+    flex: 1,
   },
-  timeInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(142,142,147,0.1)",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  timeText: {
-    fontSize: 12,
+  latestRecordTime: {
+    fontSize: 14,
     color: "#8e8e93",
-    marginLeft: 4,
   },
-  bloodPressureDisplay: {
+  bpReadingsContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 20,
-    paddingHorizontal: 12,
+    marginBottom: 24,
   },
-  bpReadingContainer: {
-    flex: 1,
+  bpReadingItem: {
     alignItems: "center",
   },
-  bpReading: {
-    flexDirection: "row",
-    alignItems: "baseline",
+  bpLabel: {
+    fontSize: 15,
+    color: "#8e8e93",
+    marginBottom: 8,
+  },
+  bpValueContainer: {
+    alignItems: "center",
   },
   bpValue: {
-    fontSize: 32,
+    fontSize: 36,
     fontWeight: "700",
-    color: "#1c1c1e",
+    marginBottom: 4,
   },
   bpUnit: {
     fontSize: 14,
     color: "#8e8e93",
-    marginLeft: 4,
   },
-  bpLabel: {
-    fontSize: 14,
-    color: "#8e8e93",
-    marginTop: 4,
-  },
-  bpDivider: {
-    width: 1,
-    height: 40,
-    backgroundColor: "#e5e5ea",
-  },
-  statusContainer: {
-    marginTop: 20,
-    flexDirection: "row",
-    justifyContent: "center",
-  },
-  statusBadge: {
-    flexDirection: "row",
+  bpStatusContainer: {
     alignItems: "center",
-    backgroundColor: "rgba(52,199,89,0.1)",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
   },
-  statusText: {
-    fontSize: 14,
-    color: "#34c759",
-    marginLeft: 6,
-    fontWeight: "600",
-  },
-  trendCard: {
-    borderRadius: 24,
+  bpStatusBar: {
+    width: "100%",
+    height: 4,
+    backgroundColor: "rgba(142,142,147,0.1)",
+    borderRadius: 2,
     overflow: "hidden",
-    backgroundColor: "#fff",
+    marginBottom: 12,
+  },
+  bpStatusIndicator: {
+    height: "100%",
+    borderRadius: 2,
+  },
+  bpStatusText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#34C759",
+    marginBottom: 4,
+  },
+  bpRangeText: {
+    fontSize: 13,
+    color: "#8e8e93",
+  },
+  actionButtonsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 16,
+    gap: 12,
+  },
+  actionButton: {
+    flex: 1,
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    padding: 16,
     ...Platform.select({
       ios: {
         shadowColor: "#000",
@@ -481,39 +438,33 @@ const styles = StyleSheet.create({
       },
     }),
   },
-  periodSelectorContainer: {
-    marginBottom: 16,
-  },
-  chartContainer: {
-    marginTop: 16,
-    width: "100%",
-    height: 220,
-    borderRadius: 12,
-    overflow: "hidden",
-    backgroundColor: "rgba(255,255,255,0.05)",
-  },
-  moreButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(45,135,255,0.1)",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-  },
-  moreButtonText: {
-    fontSize: 12,
-    color: "#2d87ff",
-    marginRight: 4,
-  },
-  quickRecordCard: {
+  actionButtonIcon: {
+    width: 48,
+    height: 48,
     borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 12,
+  },
+  actionButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1c1c1e",
+    marginBottom: 4,
+  },
+  actionButtonSubtext: {
+    fontSize: 13,
+    color: "#8e8e93",
+  },
+  trendChartCard: {
+    borderRadius: 20,
     overflow: "hidden",
-    marginBottom: 16,
+    backgroundColor: "#fff",
     ...Platform.select({
       ios: {
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.2,
+        shadowOpacity: 0.1,
         shadowRadius: 24,
       },
       android: {
@@ -521,41 +472,34 @@ const styles = StyleSheet.create({
       },
     }),
   },
-  quickRecordGradient: {
-    padding: 20,
-  },
-  quickRecordHeader: {
+  trendChartHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 20,
   },
-  quickRecordTitle: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  quickRecordTitleText: {
+  trendChartTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#fff",
-    marginLeft: 8,
+    color: "#1c1c1e",
   },
-  quickRecordHint: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  quickRecordHintItem: {
+  periodSelector: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.1)",
-    paddingHorizontal: 10,
+    backgroundColor: "rgba(142,142,147,0.1)",
+    paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 12,
+    borderRadius: 16,
+    gap: 8,
   },
-  quickRecordHintText: {
-    fontSize: 12,
-    color: "rgba(255,255,255,0.8)",
-    marginLeft: 6,
+  periodText: {
+    fontSize: 14,
+    color: "#1c1c1e",
+    fontWeight: "500",
+  },
+  chartWrapper: {
+    height: 200,
+    marginTop: 8,
   },
   modalContainer: {
     ...StyleSheet.absoluteFillObject,
@@ -588,5 +532,29 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(142,142,147,0.1)",
     alignItems: "center",
     justifyContent: "center",
+  },
+  statsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(142,142,147,0.1)",
+  },
+  statItem: {
+    alignItems: "center",
+  },
+  statLabel: {
+    fontSize: 14,
+    color: "#8e8e93",
+    marginBottom: 4,
+  },
+  statValue: {
+    fontSize: 24,
+    fontWeight: "600",
+  },
+  statUnit: {
+    fontSize: 14,
+    color: "#8e8e93",
   },
 });

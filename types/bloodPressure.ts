@@ -9,26 +9,25 @@ export interface BloodPressureRecord {
 
 // 血壓統計數據
 export interface BloodPressureStats {
-  average: {
-    systolic: number;
-    diastolic: number;
-    heartRate: number;
-  };
-  max: BloodPressureRecord;
-  min: BloodPressureRecord;
-  trend: "rising" | "falling" | "stable";
+  avgSystolic: number;
+  avgDiastolic: number;
+  avgPulse: number;
+  maxSystolic: number;
+  minSystolic: number;
+  maxDiastolic: number;
+  minDiastolic: number;
 }
 
 // 時間週期選項
-export type TimePeriod = "week" | "month" | "quarter" | "year";
+export type TimePeriod = "day" | "week" | "month" | "year";
 
 // 趨勢數據點
 export interface TrendDataPoint {
+  time: string;
   systolic: number;
   diastolic: number;
-  heartRate: number;
-  time: string; // 顯示用時間標籤
-  timestamp: Date; // 實際時間戳
+  pulse?: number;
+  timestamp: number;
 }
 
 // 趨勢數據集
@@ -72,3 +71,11 @@ export const getBPCategory = (systolic: number, diastolic: number): keyof typeof
   }
   return "normal";
 };
+
+export interface BloodPressureReading {
+  systolic: number;
+  diastolic: number;
+  pulse?: number;
+  timestamp: number;
+  note?: string;
+}

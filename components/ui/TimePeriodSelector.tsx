@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import { View, Text, StyleSheet, Pressable, Platform } from "react-native";
 import { TimePeriod } from "../../types/bloodPressure";
 import { MotiView } from "moti";
 import { LinearGradient } from "expo-linear-gradient";
@@ -9,24 +9,20 @@ interface TimePeriodSelectorProps {
   onPeriodChange: (period: TimePeriod) => void;
 }
 
-export function TimePeriodSelector({ selectedPeriod, onPeriodChange }: TimePeriodSelectorProps) {
-  const periods: { value: TimePeriod; label: string }[] = [
-    { value: "week", label: "週" },
-    { value: "month", label: "月" },
-    { value: "quarter", label: "季" },
-    { value: "year", label: "年" },
-  ];
+const periods: { value: TimePeriod; label: string }[] = [
+  { value: "day", label: "日" },
+  { value: "week", label: "週" },
+  { value: "month", label: "月" },
+  { value: "year", label: "年" },
+];
 
+export const TimePeriodSelector: React.FC<TimePeriodSelectorProps> = ({ selectedPeriod, onPeriodChange }) => {
   return (
     <MotiView style={styles.container} from={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: "timing", duration: 300 }}>
       <LinearGradient colors={["rgba(255,255,255,0.1)", "rgba(255,255,255,0.05)"]} style={styles.background}>
         <View style={styles.periodContainer}>
           {periods.map(({ value, label }) => (
-            <Pressable
-              key={value}
-              onPress={() => onPeriodChange(value)}
-              style={({ pressed }) => [styles.periodButton, selectedPeriod === value && styles.selectedPeriod, pressed && styles.pressedPeriod]}
-            >
+            <Pressable key={value} style={[styles.periodButton, selectedPeriod === value && styles.selectedPeriodButton]} onPress={() => onPeriodChange(value)}>
               <Text style={[styles.periodText, selectedPeriod === value && styles.selectedPeriodText]}>{label}</Text>
             </Pressable>
           ))}
@@ -34,7 +30,7 @@ export function TimePeriodSelector({ selectedPeriod, onPeriodChange }: TimePerio
       </LinearGradient>
     </MotiView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -58,18 +54,26 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  selectedPeriod: {
-    backgroundColor: "#7F3DFF",
-  },
-  pressedPeriod: {
-    opacity: 0.8,
+  selectedPeriodButton: {
+    backgroundColor: "#fff",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
   },
   periodText: {
     fontSize: 14,
-    color: "rgba(255,255,255,0.6)",
-    fontWeight: "600",
+    color: "#8e8e93",
+    fontWeight: "500",
   },
   selectedPeriodText: {
-    color: "#FFFFFF",
+    color: "#1c1c1e",
   },
 });
