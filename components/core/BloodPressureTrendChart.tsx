@@ -10,6 +10,7 @@ import React, { useMemo } from "react";
 import { View, StyleSheet, Text, Dimensions } from "react-native";
 import { LineChart } from "react-native-gifted-charts";
 import { TrendDataPoint, TimePeriod } from "../../types/bloodPressure";
+import { Colors } from "../../constants/Colors";
 
 interface Props {
   data: TrendDataPoint[];
@@ -27,9 +28,12 @@ interface ChartDataPoint {
 
 const SCREEN_WIDTH = Dimensions.get("window").width - 40;
 const CHART_PADDING = 16;
-const SYSTOLIC_COLOR = "#FF3B30"; // 收縮壓改用紅色
-const DIASTOLIC_COLOR = "#007AFF"; // 舒張壓改用藍色
-const CHART_HEIGHT = 200; // 減少圖表高度
+const SYSTOLIC_COLOR = "#FF3B30";
+const DIASTOLIC_COLOR = "#007AFF";
+const CHART_HEIGHT = 220;
+const GRID_COLOR = "rgba(142,142,147,0.15)";
+const AXIS_COLOR = "rgba(142,142,147,0.3)";
+const LINE_THICKNESS = 3;
 
 export function BloodPressureTrendChart({ data, period, onPointPress, chartWidth = SCREEN_WIDTH }: Props) {
   // 處理 X 軸標籤格式
@@ -80,15 +84,16 @@ export function BloodPressureTrendChart({ data, period, onPointPress, chartWidth
         spacing={45}
         initialSpacing={45}
         endSpacing={0}
-        thickness={2}
+        thickness={LINE_THICKNESS}
         hideDataPoints={false}
         dataPointsColor={SYSTOLIC_COLOR}
-        dataPointsRadius={4}
+        dataPointsRadius={5}
+        dataPointsShape="circular"
         color={SYSTOLIC_COLOR}
         startOpacity={1}
         endOpacity={1}
-        xAxisColor="rgba(142,142,147,0.3)"
-        yAxisColor="rgba(142,142,147,0.3)"
+        xAxisColor={AXIS_COLOR}
+        yAxisColor={AXIS_COLOR}
         yAxisTextStyle={styles.yAxisText}
         yAxisLabelWidth={35}
         yAxisLabelContainerStyle={styles.yAxisLabelContainer}
@@ -97,9 +102,12 @@ export function BloodPressureTrendChart({ data, period, onPointPress, chartWidth
         yAxisTextNumberOfLines={1}
         hideYAxisText={false}
         showVerticalLines
+        verticalLinesColor={GRID_COLOR}
         maxValue={yAxisRange.max}
         noOfSections={5}
         yAxisOffset={yAxisRange.min}
+        curved
+        curvature={0.25}
         formatYLabel={(label: any) => {
           const value = parseFloat(label);
           return isNaN(value) ? label : Math.round(value).toString();
@@ -114,14 +122,17 @@ export function BloodPressureTrendChart({ data, period, onPointPress, chartWidth
           value: data[lineData.indexOf(item)].diastolic,
           dataPointsColor: DIASTOLIC_COLOR,
           color: DIASTOLIC_COLOR,
-          dataPointsRadius: 4,
-          thickness: 2,
+          dataPointsRadius: 5,
+          thickness: LINE_THICKNESS,
         }))}
         secondaryLineConfig={{
           color: DIASTOLIC_COLOR,
-          thickness: 2,
-          dataPointsRadius: 4,
+          thickness: LINE_THICKNESS,
+          dataPointsRadius: 5,
           dataPointsColor: DIASTOLIC_COLOR,
+          dataPointsShape: "circular",
+          curved: true,
+          curvature: 0.25,
           startOpacity: 1,
           endOpacity: 1,
         }}
@@ -168,8 +179,8 @@ const styles = StyleSheet.create({
   legend: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: 8,
-    gap: 20,
+    marginTop: 16,
+    gap: 24,
   },
   legendItem: {
     flexDirection: "row",
@@ -183,6 +194,6 @@ const styles = StyleSheet.create({
   },
   legendText: {
     fontSize: 12,
-    color: "#8e8e93",
+    color: Colors.light.textSecondary,
   },
 });
