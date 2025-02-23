@@ -7,7 +7,7 @@
  */
 
 import React, { useMemo } from "react";
-import { View, Text, StyleSheet, Platform, Dimensions, useWindowDimensions } from "react-native";
+import { View, Text, StyleSheet, Platform, useWindowDimensions } from "react-native";
 import { TimePeriodSelector } from "../ui/TimePeriodSelector";
 import { BloodPressureTrendChart } from "./BloodPressureTrendChart";
 import { TimePeriod, TrendDataPoint, BloodPressureStats } from "../../types/bloodPressure";
@@ -24,65 +24,68 @@ interface Props {
   onPointPress?: (point: TrendDataPoint) => void;
 }
 
-const CHART_PADDING = 20;
+const CARD_PADDING = 16;
 
 export function StatisticsTrendCard({ data, stats, period, onPeriodChange, onPointPress }: Props) {
   const { width: windowWidth } = useWindowDimensions();
 
   // 計算圖表實際寬度
   const chartWidth = useMemo(() => {
-    const containerPadding = CHART_PADDING * 2; // 容器的左右padding
-    const chartPadding = CHART_PADDING * 2; // 圖表的左右padding
-    return windowWidth - (containerPadding + chartPadding + 32); // 32 是額外的安全邊距
+    const contentWidth = windowWidth - CARD_PADDING * 4; // 扣除容器和內容的 padding
+    return contentWidth;
   }, [windowWidth]);
 
   return (
     <MotiView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.titleContainer}>
-          <View style={styles.iconContainer}>
-            <FontAwesome5 name="chart-line" size={16} color={Colors.light.primary} />
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <View style={styles.titleContainer}>
+            <View style={styles.iconContainer}>
+              <FontAwesome5 name="chart-line" size={16} color={Colors.light.primary} />
+            </View>
+            <View>
+              <Text style={styles.title}>血壓趨勢</Text>
+              <Text style={styles.subtitle}>
+                {period === "day" ? "今日" : period === "week" ? "本週" : period === "month" ? "本月" : "本年度"}
+                血壓變化
+              </Text>
+            </View>
           </View>
-          <View>
-            <Text style={styles.title}>血壓趨勢</Text>
-            <Text style={styles.subtitle}>
-              {period === "day" ? "今日" : period === "week" ? "本週" : period === "month" ? "本月" : "本年度"}
-              血壓變化
+        </View>
+
+        <View style={styles.statsGrid}>
+          <View style={styles.statsItem}>
+            <Text style={styles.statsLabel}>平均收縮壓</Text>
+            <Text style={[styles.statsValue, { color: Colors.light.primary }]}>
+              {stats?.average?.systolic || "--"}
+              <Text style={styles.statsUnit}> mmHg</Text>
+            </Text>
+          </View>
+          <View style={[styles.statsItem, styles.statsItemBorder]}>
+            <Text style={styles.statsLabel}>平均舒張壓</Text>
+            <Text style={[styles.statsValue, { color: Colors.light.secondary }]}>
+              {stats?.average?.diastolic || "--"}
+              <Text style={styles.statsUnit}> mmHg</Text>
+            </Text>
+          </View>
+          <View style={styles.statsItem}>
+            <Text style={styles.statsLabel}>平均心率</Text>
+            <Text style={[styles.statsValue, { color: Colors.light.success }]}>
+              {stats?.average?.heartRate || "--"}
+              <Text style={styles.statsUnit}> BPM</Text>
             </Text>
           </View>
         </View>
-      </View>
 
-      <View style={styles.statsGrid}>
-        <View style={styles.statsItem}>
-          <Text style={styles.statsLabel}>平均收縮壓</Text>
-          <Text style={[styles.statsValue, { color: Colors.light.primary }]}>
-            {stats?.average?.systolic || "--"}
-            <Text style={styles.statsUnit}> mmHg</Text>
-          </Text>
-        </View>
-        <View style={[styles.statsItem, styles.statsItemBorder]}>
-          <Text style={styles.statsLabel}>平均舒張壓</Text>
-          <Text style={[styles.statsValue, { color: Colors.light.secondary }]}>
-            {stats?.average?.diastolic || "--"}
-            <Text style={styles.statsUnit}> mmHg</Text>
-          </Text>
-        </View>
-        <View style={styles.statsItem}>
-          <Text style={styles.statsLabel}>平均心率</Text>
-          <Text style={[styles.statsValue, { color: Colors.light.success }]}>
-            {stats?.average?.heartRate || "--"}
-            <Text style={styles.statsUnit}> BPM</Text>
-          </Text>
+        <View style={styles.periodContainer}>
+          <TimePeriodSelector selectedPeriod={period} onPeriodChange={onPeriodChange} />
         </View>
       </View>
 
-      <View style={styles.periodContainer}>
-        <TimePeriodSelector selectedPeriod={period} onPeriodChange={onPeriodChange} />
-      </View>
-
-      <View style={styles.chartContainer}>
-        <BloodPressureTrendChart data={data} period={period} onPointPress={onPointPress} chartWidth={chartWidth} />
+      <View style={styles.chartWrapper}>
+        <View style={styles.chartContainer}>
+          <BloodPressureTrendChart data={data} period={period} onPointPress={onPointPress} chartWidth={chartWidth} />
+        </View>
       </View>
     </MotiView>
   );
@@ -92,7 +95,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: "#fff",
     borderRadius: 20,
-    padding: CHART_PADDING,
+    overflow: "hidden",
     ...Platform.select({
       ios: {
         shadowColor: "#000",
@@ -104,6 +107,9 @@ const styles = StyleSheet.create({
         elevation: 4,
       },
     }),
+  },
+  content: {
+    padding: CARD_PADDING,
   },
   header: {
     flexDirection: "row",
@@ -167,6 +173,11 @@ const styles = StyleSheet.create({
   },
   periodContainer: {
     marginBottom: 20,
+  },
+  chartWrapper: {
+    backgroundColor: Colors.light.background,
+    paddingHorizontal: CARD_PADDING,
+    paddingVertical: CARD_PADDING,
   },
   chartContainer: {
     width: "100%",
