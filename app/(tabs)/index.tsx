@@ -103,6 +103,12 @@ export default function HomeScreen() {
     router.push("/profile/notifications");
   };
 
+  // 新增提醒處理函數
+  const handleReminder = () => {
+    // 這裡可以導航到提醒頁面
+    console.log("Navigate to reminder page");
+  };
+
   return (
     <View style={styles.container}>
       {/* 新設計的頂部區域 */}
@@ -191,23 +197,41 @@ export default function HomeScreen() {
           </View>
 
           {/* 功能按鈕區 */}
-          <View style={styles.actionButtonsContainer}>
-            <Pressable style={styles.actionButton} onPress={() => router.push("/camera")}>
-              <View style={[styles.actionButtonIcon, { backgroundColor: `${Colors.light.success}1A` }]}>
-                <FontAwesome5 name="camera" size={20} color={Colors.light.success} />
-              </View>
-              <Text style={[styles.actionButtonText, { color: Colors.light.text }]}>拍照識別</Text>
-              <Text style={[styles.actionButtonSubtext, { color: Colors.light.textSecondary }]}>快速輸入</Text>
-            </Pressable>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.actionButtonsScrollContainer}>
+            <View style={styles.actionButtonsContainer}>
+              <Pressable style={styles.actionButton} onPress={() => router.push("/camera")}>
+                <View style={[styles.actionButtonIcon, { backgroundColor: `${Colors.light.success}1A` }]}>
+                  <FontAwesome5 name="camera" size={20} color={Colors.light.success} />
+                </View>
+                <Text style={[styles.actionButtonText, { color: Colors.light.text }]}>拍照識別</Text>
+                <Text style={[styles.actionButtonSubtext, { color: Colors.light.textSecondary }]}>快速輸入</Text>
+              </Pressable>
 
-            <Pressable style={styles.actionButton} onPress={() => router.push("/statistics")}>
-              <View style={[styles.actionButtonIcon, { backgroundColor: `${Colors.light.secondary}1A` }]}>
-                <FontAwesome5 name="chart-line" size={20} color={Colors.light.secondary} />
-              </View>
-              <Text style={[styles.actionButtonText, { color: Colors.light.text }]}>血壓趨勢</Text>
-              <Text style={[styles.actionButtonSubtext, { color: Colors.light.textSecondary }]}>查看分析</Text>
-            </Pressable>
-          </View>
+              <Pressable style={styles.actionButton} onPress={() => router.push("/statistics")}>
+                <View style={[styles.actionButtonIcon, { backgroundColor: `${Colors.light.secondary}1A` }]}>
+                  <FontAwesome5 name="chart-line" size={20} color={Colors.light.secondary} />
+                </View>
+                <Text style={[styles.actionButtonText, { color: Colors.light.text }]}>血壓趨勢</Text>
+                <Text style={[styles.actionButtonSubtext, { color: Colors.light.textSecondary }]}>查看分析</Text>
+              </Pressable>
+
+              <Pressable style={styles.actionButton} onPress={handleReminder}>
+                <View style={[styles.actionButtonIcon, { backgroundColor: `${Colors.light.primary}1A` }]}>
+                  <FontAwesome5 name="clock" size={20} color={Colors.light.primary} />
+                </View>
+                <Text style={[styles.actionButtonText, { color: Colors.light.text }]}>智能提醒</Text>
+                <Text style={[styles.actionButtonSubtext, { color: Colors.light.textSecondary }]}>定時提醒</Text>
+              </Pressable>
+
+              <Pressable style={styles.actionButton} onPress={handleQuickRecord}>
+                <View style={[styles.actionButtonIcon, { backgroundColor: `${Colors.light.warning}1A` }]}>
+                  <FontAwesome5 name="plus" size={20} color={Colors.light.warning} />
+                </View>
+                <Text style={[styles.actionButtonText, { color: Colors.light.text }]}>快速記錄</Text>
+                <Text style={[styles.actionButtonSubtext, { color: Colors.light.textSecondary }]}>一鍵輸入</Text>
+              </Pressable>
+            </View>
+          </ScrollView>
 
           {/* 血壓趨勢圖表 */}
           <View style={styles.trendChartCard}>
@@ -420,11 +444,13 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#8e8e93",
   },
+  actionButtonsScrollContainer: {
+    paddingHorizontal: 16,
+  },
   actionButtonsContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 16,
     gap: 12,
+    marginVertical: 16,
   },
   actionButton: {
     flex: 1,
