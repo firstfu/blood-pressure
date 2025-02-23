@@ -17,8 +17,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useState, useRef, useEffect } from "react";
 import { MotiView } from "moti";
 import { Colors } from "../../constants/Colors";
-import { Typography } from "../../constants/Typography";
-import { StatusBar } from "expo-status-bar";
 
 type Message = {
   id: string;
@@ -185,16 +183,12 @@ export default function AssistantScreen() {
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      <StatusBar style="light" />
       {/* 頂部區域 */}
       <LinearGradient colors={[Colors.light.primary, Colors.light.secondary]} style={styles.headerGradient}>
         <SafeAreaView>
-          <View style={styles.headerContent}>
-            <View>
-              <Text style={styles.headerTitle}>AI 助手</Text>
-              <Text style={styles.headerSubtitle}>智能健康諮詢</Text>
-            </View>
-            <Pressable style={({ pressed }) => [styles.iconButton, pressed && styles.iconButtonPressed]} onPress={handleHelpPress}>
+          <View style={styles.header}>
+            <Text style={styles.headerTitle}>AI 助手</Text>
+            <Pressable style={({ pressed }) => [styles.iconButton, pressed && { opacity: 0.8 }]} onPress={handleHelpPress}>
               <FontAwesome5 name="question-circle" size={20} color="#fff" />
             </Pressable>
           </View>
@@ -204,20 +198,20 @@ export default function AssistantScreen() {
       {/* 主要內容區 */}
       <View style={styles.mainContent}>
         {/* 快速提問建議 */}
-        <MotiView from={{ opacity: 0, translateY: 20 }} animate={{ opacity: 1, translateY: 0 }} transition={{ type: "timing", duration: 500 }} style={styles.suggestionsWrapper}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.suggestionsContainer} contentContainerStyle={styles.suggestionsContent}>
-            {suggestions.map((suggestion, index) => (
-              <MotiView key={suggestion.id} from={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: "timing", duration: 500, delay: index * 100 }}>
-                <Pressable style={({ pressed }) => [styles.suggestionButton, pressed && styles.suggestionButtonPressed]} onPress={() => handleSuggestionPress(suggestion)}>
-                  <View style={[styles.suggestionIcon, { backgroundColor: `${suggestion.color}20` }]}>
-                    <FontAwesome5 name={suggestion.icon} size={20} color={suggestion.color} />
-                  </View>
-                  <Text style={styles.suggestionText}>{suggestion.title}</Text>
-                </Pressable>
-              </MotiView>
-            ))}
-          </ScrollView>
-        </MotiView>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.suggestionsContainer} contentContainerStyle={styles.suggestionsContent}>
+          {suggestions.map(suggestion => (
+            <Pressable
+              key={suggestion.id}
+              style={({ pressed }) => [styles.suggestionButton, pressed && { opacity: 0.8, transform: [{ scale: 0.95 }] }]}
+              onPress={() => handleSuggestionPress(suggestion)}
+            >
+              <View style={[styles.suggestionIcon, { backgroundColor: `${suggestion.color}20` }]}>
+                <FontAwesome5 name={suggestion.icon} size={20} color={suggestion.color} />
+              </View>
+              <Text style={styles.suggestionText}>{suggestion.title}</Text>
+            </Pressable>
+          ))}
+        </ScrollView>
 
         {/* 對話區域 */}
         <ScrollView
@@ -226,12 +220,12 @@ export default function AssistantScreen() {
           ref={scrollViewRef}
           onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
         >
-          {messages.map((message, index) => (
+          {messages.map(message => (
             <MotiView
               key={message.id}
-              from={{ opacity: 0, translateY: 20, scale: 0.95 }}
-              animate={{ opacity: 1, translateY: 0, scale: 1 }}
-              transition={{ type: "timing", duration: 300, delay: index * 100 }}
+              from={{ opacity: 0, translateY: 20 }}
+              animate={{ opacity: 1, translateY: 0 }}
+              transition={{ type: "timing", duration: 300 }}
               style={[styles.messageContainer, message.type === "user" ? styles.userMessage : styles.assistantMessage]}
             >
               {message.type === "assistant" && (
@@ -250,15 +244,16 @@ export default function AssistantScreen() {
         {/* 輸入區域 */}
         <View style={styles.inputContainer}>
           <TextInput
-            style={[styles.input, { maxHeight: 100 }]}
+            style={styles.input}
             placeholder="輸入您的問題..."
             placeholderTextColor={Colors.light.textSecondary}
             multiline
             value={inputText}
             onChangeText={setInputText}
+            onSubmitEditing={handleSendMessage}
           />
           <Animated.View style={[styles.sendButton, { transform: [{ scale: sendButtonScale }] }]}>
-            <Pressable onPress={handleSendMessage} style={({ pressed }) => pressed && styles.sendButtonPressed}>
+            <Pressable onPress={handleSendMessage}>
               <LinearGradient colors={[Colors.light.primary, Colors.light.secondary]} style={styles.sendButtonGradient}>
                 <FontAwesome5 name="paper-plane" size={16} color="#fff" />
               </LinearGradient>
@@ -277,90 +272,63 @@ const styles = StyleSheet.create({
   },
   headerGradient: {
     width: "100%",
-    paddingTop: Platform.OS === "android" ? 40 : 0,
   },
-  headerContent: {
+  header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingHorizontal: 16,
+    paddingVertical: Platform.OS === "android" ? 16 : 8,
   },
   headerTitle: {
-    fontSize: Typography.size.h2,
-    fontWeight: Typography.weight.bold,
+    fontSize: 20,
+    fontWeight: "600",
     color: "#fff",
-    marginBottom: 4,
-  },
-  headerSubtitle: {
-    fontSize: Typography.size.small,
-    color: "rgba(255,255,255,0.9)",
   },
   iconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  iconButtonPressed: {
-    opacity: 0.8,
+    padding: 8,
   },
   mainContent: {
     flex: 1,
-    backgroundColor: Colors.light.background,
-  },
-  suggestionsWrapper: {
-    backgroundColor: "#fff",
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.light.border,
-    marginBottom: 16,
   },
   suggestionsContainer: {
     maxHeight: 100,
+    paddingVertical: 12,
   },
   suggestionsContent: {
     paddingHorizontal: 16,
     gap: 12,
-    paddingBottom: 8,
   },
   suggestionButton: {
     alignItems: "center",
     backgroundColor: "#fff",
     borderRadius: 16,
-    padding: 16,
+    padding: 12,
     marginRight: 12,
-    width: 100,
     ...Platform.select({
       ios: {
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
-        shadowRadius: 8,
+        shadowRadius: 4,
       },
       android: {
         elevation: 4,
       },
     }),
   },
-  suggestionButtonPressed: {
-    opacity: 0.8,
-    transform: [{ scale: 0.95 }],
-  },
   suggestionIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 8,
   },
   suggestionText: {
-    fontSize: Typography.size.small,
-    fontWeight: Typography.weight.medium,
+    fontSize: 12,
     color: Colors.light.text,
+    fontWeight: "500",
   },
   chatContainer: {
     flex: 1,
@@ -391,7 +359,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   messageBubble: {
-    maxWidth: "75%",
+    maxWidth: "70%",
     padding: 12,
     borderRadius: 16,
     ...Platform.select({
@@ -402,7 +370,7 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
       },
       android: {
-        elevation: 2,
+        elevation: 4,
       },
     }),
   },
@@ -415,15 +383,15 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 4,
   },
   messageText: {
-    fontSize: Typography.size.regular,
+    fontSize: 14,
     color: Colors.light.text,
-    lineHeight: Typography.lineHeight.normal * Typography.size.regular,
+    lineHeight: 20,
   },
   userMessageText: {
     color: "#fff",
   },
   messageTime: {
-    fontSize: Typography.size.caption,
+    fontSize: 12,
     color: Colors.light.textSecondary,
     marginTop: 4,
     alignSelf: "flex-end",
@@ -433,7 +401,7 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     flexDirection: "row",
-    alignItems: "flex-end",
+    alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderTopWidth: 1,
@@ -443,20 +411,18 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     minHeight: 40,
+    maxHeight: 100,
     backgroundColor: Colors.light.background,
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 8,
     marginRight: 12,
-    fontSize: Typography.size.regular,
+    fontSize: 14,
     color: Colors.light.text,
   },
   sendButton: {
     width: 40,
     height: 40,
-  },
-  sendButtonPressed: {
-    opacity: 0.8,
   },
   sendButtonGradient: {
     width: 40,
