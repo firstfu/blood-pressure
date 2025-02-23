@@ -1,3 +1,23 @@
+/**
+ * @file settings.tsx
+ * @author FirstFu
+ * @date 2024-03-21
+ * @module Screens/Profile/Settings
+ * @description 設置頁面
+ * 提供應用程序的設置和配置功能：
+ * 1. 數據導出（CSV/PDF）
+ * 2. 通知設置
+ * 3. 主題設置
+ * 4. 隱私設置
+ * 5. 其他系統設置
+ *
+ * @dependencies
+ * - expo-router: 路由導航
+ * - expo-linear-gradient: 漸變背景
+ * - moti: 動畫效果
+ * - exportService: 數據導出服務
+ */
+
 import { StyleSheet, View, Text, ScrollView, Pressable, Platform, Switch, Alert } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { FontAwesome5 } from "@expo/vector-icons";
@@ -7,6 +27,17 @@ import { useState } from "react";
 import { exportToCSV, exportToPDF } from "../../lib/exportService";
 import { useBloodPressureStore } from "../../store/bloodPressureStore";
 
+/**
+ * 設置選項接口
+ * @interface SettingOption
+ * @property {string} id - 選項唯一標識
+ * @property {string} title - 選項標題
+ * @property {string} [description] - 選項描述（可選）
+ * @property {string} icon - 選項圖標名稱
+ * @property {"switch" | "button" | "link"} type - 選項類型
+ * @property {boolean} [value] - 開關類型的值（可選）
+ * @property {() => void} [onPress] - 點擊事件處理函數（可選）
+ */
 interface SettingOption {
   id: string;
   title: string;
@@ -17,6 +48,16 @@ interface SettingOption {
   onPress?: () => void;
 }
 
+/**
+ * 設置頁面組件
+ * @returns JSX.Element
+ * @description
+ * 主要功能：
+ * 1. 顯示設置選項列表
+ * 2. 處理設置項的狀態變更
+ * 3. 處理數據導出功能
+ * 4. 提供頁面導航
+ */
 export default function SettingsScreen() {
   const [settings, setSettings] = useState({
     darkMode: false,
@@ -215,6 +256,9 @@ export default function SettingsScreen() {
   );
 }
 
+/**
+ * 頁面樣式定義
+ */
 const styles = StyleSheet.create({
   container: {
     flex: 1,

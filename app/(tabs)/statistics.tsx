@@ -1,3 +1,23 @@
+/**
+ * @file statistics.tsx
+ * @author FirstFu
+ * @date 2024-03-21
+ * @module Screens/Statistics
+ * @description 血壓統計分析頁面
+ * 提供血壓數據的可視化分析功能：
+ * 1. 血壓趨勢圖表
+ * 2. 統計概覽
+ * 3. 時間週期選擇
+ * 4. 血壓分布統計
+ *
+ * @dependencies
+ * - expo-vector-icons: 圖標
+ * - expo-linear-gradient: 漸變背景
+ * - moti: 動畫效果
+ * - react-native-view-shot: 截圖功能
+ * - statisticsService: 統計分析服務
+ */
+
 import { StyleSheet, View, Text, SafeAreaView, ScrollView, Platform, Alert, Share, Pressable } from "react-native";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { MotiView } from "moti";
@@ -12,7 +32,16 @@ import { BloodPressureStats as StatsComponent } from "../../components/core/Bloo
 import ViewShot, { ViewShotProperties } from "react-native-view-shot";
 import { StatusBar } from "expo-status-bar";
 
-// 模擬數據
+/**
+ * 模擬血壓記錄數據
+ * @description
+ * 生成30天的模擬數據，包含：
+ * - 收縮壓：100-140 mmHg
+ * - 舒張壓：60-90 mmHg
+ * - 心率：60-100 次/分
+ * - 記錄時間：最近30天
+ * - 記錄類別：morning/noon/evening/night
+ */
 const mockRecords = Array.from({ length: 30 }, (_, index) => ({
   id: `record-${index}`,
   systolic: Math.floor(Math.random() * 40 + 100), // 100-140
@@ -23,6 +52,17 @@ const mockRecords = Array.from({ length: 30 }, (_, index) => ({
   category: ["morning", "noon", "evening", "night"][Math.floor(Math.random() * 4)] as "morning" | "noon" | "evening" | "night",
 }));
 
+/**
+ * 統計分析頁面組件
+ * @returns JSX.Element
+ * @description
+ * 主要功能：
+ * 1. 顯示血壓統計概覽
+ * 2. 提供時間週期選擇
+ * 3. 展示血壓趨勢圖表
+ * 4. 展示血壓分布統計
+ * 5. 支持分享統計報告
+ */
 export default function StatisticsScreen() {
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("week");
   const [stats, setStats] = useState<BloodPressureStats | null>(null);
@@ -148,6 +188,11 @@ export default function StatisticsScreen() {
   );
 }
 
+/**
+ * 獲取血壓狀態的顏色
+ * @param category - 血壓狀態類別
+ * @returns 對應的顏色代碼
+ */
 const getStatusColor = (category: string) => {
   switch (category) {
     case "normal":
@@ -165,6 +210,11 @@ const getStatusColor = (category: string) => {
   }
 };
 
+/**
+ * 獲取血壓狀態的標籤
+ * @param category - 血壓狀態類別
+ * @returns 對應的中文標籤
+ */
 const getCategoryLabel = (category: string) => {
   switch (category) {
     case "normal":
@@ -182,6 +232,9 @@ const getCategoryLabel = (category: string) => {
   }
 };
 
+/**
+ * 頁面樣式定義
+ */
 const styles = StyleSheet.create({
   container: {
     flex: 1,

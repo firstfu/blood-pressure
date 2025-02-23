@@ -1,8 +1,35 @@
+/**
+ * @file exportService.ts
+ * @author FirstFu
+ * @date 2024-03-21
+ * @module Services/Export
+ * @description 血壓數據導出服務
+ * 提供將血壓記錄導出為不同格式的功能：
+ * 1. CSV格式導出
+ * 2. PDF格式導出
+ *
+ * @dependencies
+ * - expo-file-system: 文件系統操作
+ * - expo-sharing: 文件分享功能
+ * - types/bloodPressure.ts: 血壓相關類型定義
+ */
+
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import { BloodPressureRecord } from "../types/bloodPressure";
 
-// 生成 CSV 內容
+/**
+ * 生成CSV格式的內容
+ * @param records - 血壓記錄數組
+ * @returns CSV格式的字符串
+ * @description
+ * 生成的CSV包含以下列：
+ * - 日期：記錄的時間戳（本地時間格式）
+ * - 收縮壓：mmHg
+ * - 舒張壓：mmHg
+ * - 心率：次/分
+ * - 備註：可選的記錄備註
+ */
 const generateCSVContent = (records: BloodPressureRecord[]): string => {
   const header = "日期,收縮壓,舒張壓,心率,備註\n";
   const rows = records
@@ -14,7 +41,17 @@ const generateCSVContent = (records: BloodPressureRecord[]): string => {
   return header + rows;
 };
 
-// 生成 PDF 內容
+/**
+ * 生成PDF格式的內容
+ * @param records - 血壓記錄數組
+ * @returns HTML格式的字符串（用於生成PDF）
+ * @description
+ * 生成帶有樣式的HTML表格，包含：
+ * - 響應式表格布局
+ * - 自定義表格樣式
+ * - 主題顏色：#7F3DFF
+ * - 數據列：日期、收縮壓、舒張壓、心率、備註
+ */
 const generatePDFContent = (records: BloodPressureRecord[]): string => {
   const rows = records
     .map(record => {
@@ -61,7 +98,16 @@ const generatePDFContent = (records: BloodPressureRecord[]): string => {
   `;
 };
 
-// 導出為 CSV
+/**
+ * 導出血壓記錄為CSV文件
+ * @param records - 血壓記錄數組
+ * @returns Promise<void>
+ * @throws {Error} 導出失敗時拋出錯誤
+ * @description
+ * 1. 生成CSV內容
+ * 2. 寫入臨時文件
+ * 3. 使用系統分享功能分享文件
+ */
 export const exportToCSV = async (records: BloodPressureRecord[]): Promise<void> => {
   try {
     const csvContent = generateCSVContent(records);
@@ -85,7 +131,17 @@ export const exportToCSV = async (records: BloodPressureRecord[]): Promise<void>
   }
 };
 
-// 導出為 PDF
+/**
+ * 導出血壓記錄為PDF文件
+ * @param records - 血壓記錄數組
+ * @returns Promise<void>
+ * @throws {Error} 導出失敗時拋出錯誤
+ * @description
+ * 1. 生成HTML內容
+ * 2. 寫入臨時文件
+ * 3. 使用系統分享功能分享文件
+ * 注意：目前直接分享HTML內容，後續可考慮使用PDF生成庫
+ */
 export const exportToPDF = async (records: BloodPressureRecord[]): Promise<void> => {
   try {
     const htmlContent = generatePDFContent(records);
