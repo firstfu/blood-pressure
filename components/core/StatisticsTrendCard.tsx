@@ -25,14 +25,16 @@ interface Props {
 }
 
 const CARD_PADDING = 16;
+const CHART_HORIZONTAL_PADDING = 8;
 
 export function StatisticsTrendCard({ data, stats, period, onPeriodChange, onPointPress }: Props) {
   const { width: windowWidth } = useWindowDimensions();
 
   // 計算圖表實際寬度
   const chartWidth = useMemo(() => {
-    const contentWidth = windowWidth - CARD_PADDING * 4; // 扣除容器和內容的 padding
-    return contentWidth;
+    // 扣除容器的 padding 和圖表的水平內邊距
+    const totalPadding = CARD_PADDING * 2 + CHART_HORIZONTAL_PADDING * 2;
+    return windowWidth - totalPadding;
   }, [windowWidth]);
 
   return (
@@ -176,8 +178,8 @@ const styles = StyleSheet.create({
   },
   chartWrapper: {
     backgroundColor: Colors.light.background,
-    paddingHorizontal: CARD_PADDING,
     paddingVertical: CARD_PADDING,
+    paddingHorizontal: CHART_HORIZONTAL_PADDING,
   },
   chartContainer: {
     width: "100%",
