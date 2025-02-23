@@ -76,7 +76,7 @@ export function BloodPressureTrendChart({ data, period, onPointPress, chartWidth
         width={chartWidth}
         height={CHART_HEIGHT}
         spacing={40}
-        initialSpacing={0}
+        initialSpacing={10}
         endSpacing={0}
         thickness={2}
         hideDataPoints={false}
@@ -88,7 +88,7 @@ export function BloodPressureTrendChart({ data, period, onPointPress, chartWidth
         xAxisColor="rgba(142,142,147,0.3)"
         yAxisColor="rgba(142,142,147,0.3)"
         yAxisTextStyle={styles.yAxisText}
-        yAxisLabelWidth={30}
+        yAxisLabelWidth={35}
         yAxisLabelContainerStyle={styles.yAxisLabelContainer}
         xAxisLabelTextStyle={styles.xAxisLabelText}
         yAxisTextNumberOfLines={1}
@@ -150,6 +150,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "rgba(142,142,147,0.8)",
     marginRight: 0,
+    textAlign: "right",
+    width: "100%",
   },
   xAxisLabelText: {
     fontSize: 12,
@@ -157,7 +159,8 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   yAxisLabelContainer: {
-    marginRight: 0,
+    marginRight: 4,
+    paddingRight: 0,
   },
   legend: {
     flexDirection: "row",
