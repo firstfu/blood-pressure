@@ -76,7 +76,7 @@ export function BloodPressureTrendChart({ data, period, onPointPress, chartWidth
         width={chartWidth}
         height={CHART_HEIGHT}
         spacing={40}
-        initialSpacing={10}
+        initialSpacing={0}
         endSpacing={0}
         thickness={2}
         hideDataPoints={false}
