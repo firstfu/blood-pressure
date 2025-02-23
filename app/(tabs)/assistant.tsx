@@ -17,6 +17,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useState, useRef, useEffect } from "react";
 import { MotiView } from "moti";
 import { Colors } from "../../constants/Colors";
+import { Typography } from "../../constants/Typography";
+import { StatusBar } from "expo-status-bar";
 
 type Message = {
   id: string;
@@ -59,25 +61,25 @@ export default function AssistantScreen() {
       id: "1",
       icon: "heartbeat",
       title: "血壓知識",
-      color: "#ff6b6b",
+      color: Colors.light.primary,
     },
     {
       id: "2",
       icon: "cutlery",
       title: "飲食建議",
-      color: "#4ecdc4",
+      color: Colors.light.secondary,
     },
     {
       id: "3",
       icon: "question-circle",
       title: "運動建議",
-      color: "#45b7d1",
+      color: Colors.light.success,
     },
     {
       id: "4",
       icon: "bed",
       title: "生活作息",
-      color: "#96c",
+      color: Colors.light.warning,
     },
   ]);
 
@@ -183,12 +185,17 @@ export default function AssistantScreen() {
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      {/* 頂部區域 */}
-      <LinearGradient colors={[Colors.light.primary, Colors.light.secondary]} style={styles.headerGradient}>
+      <StatusBar style="light" />
+
+      {/* 頂部導航區域 */}
+      <LinearGradient colors={[Colors.light.primary, Colors.light.primary]} style={styles.headerGradient}>
         <SafeAreaView>
           <View style={styles.header}>
-            <Text style={styles.headerTitle}>AI 助手</Text>
-            <Pressable style={({ pressed }) => [styles.iconButton, pressed && { opacity: 0.8 }]} onPress={handleHelpPress}>
+            <View>
+              <Text style={styles.headerTitle}>AI 助手</Text>
+              <Text style={styles.headerSubtitle}>智能健康諮詢</Text>
+            </View>
+            <Pressable style={({ pressed }) => [styles.iconButton, pressed && styles.iconButtonPressed]} onPress={handleHelpPress}>
               <FontAwesome5 name="question-circle" size={20} color="#fff" />
             </Pressable>
           </View>
@@ -202,11 +209,11 @@ export default function AssistantScreen() {
           {suggestions.map(suggestion => (
             <Pressable
               key={suggestion.id}
-              style={({ pressed }) => [styles.suggestionButton, pressed && { opacity: 0.8, transform: [{ scale: 0.95 }] }]}
+              style={({ pressed }) => [styles.suggestionButton, pressed && styles.suggestionButtonPressed]}
               onPress={() => handleSuggestionPress(suggestion)}
             >
-              <View style={[styles.suggestionIcon, { backgroundColor: `${suggestion.color}20` }]}>
-                <FontAwesome5 name={suggestion.icon} size={20} color={suggestion.color} />
+              <View style={[styles.suggestionIcon, { backgroundColor: suggestion.color }]}>
+                <FontAwesome5 name={suggestion.icon} size={20} color="#fff" />
               </View>
               <Text style={styles.suggestionText}>{suggestion.title}</Text>
             </Pressable>
@@ -248,13 +255,13 @@ export default function AssistantScreen() {
             placeholder="輸入您的問題..."
             placeholderTextColor={Colors.light.textSecondary}
             multiline
+            maxLength={500}
             value={inputText}
             onChangeText={setInputText}
-            onSubmitEditing={handleSendMessage}
           />
           <Animated.View style={[styles.sendButton, { transform: [{ scale: sendButtonScale }] }]}>
-            <Pressable onPress={handleSendMessage}>
-              <LinearGradient colors={[Colors.light.primary, Colors.light.secondary]} style={styles.sendButtonGradient}>
+            <Pressable onPress={handleSendMessage} style={({ pressed }) => pressed && styles.sendButtonPressed}>
+              <LinearGradient colors={[Colors.light.primary, Colors.light.primary]} style={styles.sendButtonGradient}>
                 <FontAwesome5 name="paper-plane" size={16} color="#fff" />
               </LinearGradient>
             </Pressable>
@@ -272,28 +279,46 @@ const styles = StyleSheet.create({
   },
   headerGradient: {
     width: "100%",
+    paddingTop: Platform.OS === "android" ? 40 : 0,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: Platform.OS === "android" ? 16 : 8,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: "600",
+    fontSize: Typography.size.h2,
+    fontWeight: Typography.weight.bold,
     color: "#fff",
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: Typography.size.small,
+    color: "rgba(255,255,255,0.9)",
   },
   iconButton: {
-    padding: 8,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  iconButtonPressed: {
+    opacity: 0.8,
   },
   mainContent: {
     flex: 1,
+    backgroundColor: Colors.light.background,
   },
   suggestionsContainer: {
     maxHeight: 100,
     paddingVertical: 12,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.light.border,
   },
   suggestionsContent: {
     paddingHorizontal: 16,
@@ -302,33 +327,43 @@ const styles = StyleSheet.create({
   suggestionButton: {
     alignItems: "center",
     backgroundColor: "#fff",
-    borderRadius: 16,
+    borderRadius: 12,
     padding: 12,
     marginRight: 12,
+    width: 90,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
     ...Platform.select({
       ios: {
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
-        shadowRadius: 4,
+        shadowRadius: 8,
       },
       android: {
         elevation: 4,
       },
     }),
   },
+  suggestionButtonPressed: {
+    opacity: 0.8,
+    transform: [{ scale: 0.98 }],
+  },
   suggestionIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 8,
   },
   suggestionText: {
-    fontSize: 12,
+    fontSize: Typography.size.small,
     color: Colors.light.text,
-    fontWeight: "500",
+    fontWeight: Typography.weight.medium,
+    textAlign: "center",
+    paddingHorizontal: 2,
+    lineHeight: Typography.lineHeight.tight * Typography.size.small,
   },
   chatContainer: {
     flex: 1,
@@ -370,7 +405,7 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
       },
       android: {
-        elevation: 4,
+        elevation: 2,
       },
     }),
   },
@@ -383,15 +418,15 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 4,
   },
   messageText: {
-    fontSize: 14,
+    fontSize: Typography.size.regular,
     color: Colors.light.text,
-    lineHeight: 20,
+    lineHeight: Typography.lineHeight.normal * Typography.size.regular,
   },
   userMessageText: {
     color: "#fff",
   },
   messageTime: {
-    fontSize: 12,
+    fontSize: Typography.size.caption,
     color: Colors.light.textSecondary,
     marginTop: 4,
     alignSelf: "flex-end",
@@ -417,12 +452,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     marginRight: 12,
-    fontSize: 14,
+    fontSize: Typography.size.regular,
     color: Colors.light.text,
   },
   sendButton: {
     width: 40,
     height: 40,
+  },
+  sendButtonPressed: {
+    opacity: 0.8,
   },
   sendButtonGradient: {
     width: 40,
