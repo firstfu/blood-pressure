@@ -52,6 +52,16 @@ export const checkNotificationPermissions = async () => {
   return true;
 };
 
+// 創建每日重複的通知觸發器
+export const createDailyTrigger = (hour: number, minute: number): Notifications.NotificationTriggerInput => {
+  return {
+    type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
+    hour: hour,
+    minute: minute,
+    repeats: true,
+  };
+};
+
 // 排程通知
 export const scheduleNotification = async ({
   id,
@@ -61,14 +71,16 @@ export const scheduleNotification = async ({
   minute,
   sound = true,
   vibrate = true,
+  trigger,
 }: {
   id: string;
   title: string;
   body: string;
-  hour: number;
-  minute: number;
+  hour?: number;
+  minute?: number;
   sound?: boolean;
   vibrate?: boolean;
+  trigger?: Notifications.NotificationTriggerInput;
 }) => {
   try {
     const hasPermission = await checkNotificationPermissions();
@@ -79,25 +91,14 @@ export const scheduleNotification = async ({
     // 取消現有的通知（如果存在）
     await cancelNotification(id);
 
-    // 設置下一次通知的時間
-    const now = new Date();
-    const scheduledTime = new Date(now);
-    scheduledTime.setHours(hour, minute, 0, 0);
+    // 使用提供的觸發器或創建每日重複的觸發器
+    const notificationTrigger = trigger || (hour !== undefined && minute !== undefined ? createDailyTrigger(hour, minute) : undefined);
 
-    // 如果設定時間已經過了，就設定為明天
-    if (scheduledTime <= now) {
-      scheduledTime.setDate(scheduledTime.getDate() + 1);
+    if (!notificationTrigger) {
+      throw new Error("未提供有效的通知觸發器");
     }
 
-    // 計算延遲秒數
-    const seconds = Math.floor((scheduledTime.getTime() - now.getTime()) / 1000);
-
     // 排程通知
-    const trigger: Notifications.TimeIntervalTriggerInput = {
-      type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-      seconds,
-    };
-
     await Notifications.scheduleNotificationAsync({
       content: {
         title,
@@ -105,7 +106,7 @@ export const scheduleNotification = async ({
         sound,
         data: { id, vibrate },
       },
-      trigger,
+      trigger: notificationTrigger,
       identifier: id,
     });
 
@@ -114,8 +115,8 @@ export const scheduleNotification = async ({
       id,
       title,
       body,
-      hour,
-      minute,
+      hour: hour || 0,
+      minute: minute || 0,
       sound,
       vibrate,
     });

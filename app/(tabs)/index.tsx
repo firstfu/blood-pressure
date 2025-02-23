@@ -62,6 +62,21 @@ export default function HomeScreen() {
     setShowQuickRecord(false);
   };
 
+  const handleSaveRecord = (data: { systolic: number; diastolic: number; pulse: number; note: string; category: string }) => {
+    const newRecord = {
+      id: String(Date.now()),
+      systolic: data.systolic,
+      diastolic: data.diastolic,
+      heartRate: data.pulse,
+      timestamp: Date.now(),
+      note: data.note,
+      category: data.category,
+    };
+
+    // TODO: 使用 zustand store 來儲存記錄
+    setShowQuickRecord(false);
+  };
+
   const headerHeight = scrollY.interpolate({
     inputRange: [0, 100],
     outputRange: [Platform.OS === "android" ? 180 : 140, Platform.OS === "android" ? 120 : 100],
@@ -243,25 +258,18 @@ export default function HomeScreen() {
       {/* 快速記錄模態框 */}
       <AnimatePresence>
         {showQuickRecord && (
-          <MotiView
-            from={{ translateY: 1000, opacity: 0 }}
-            animate={{ translateY: 0, opacity: 1 }}
-            exit={{ translateY: 1000, opacity: 0 }}
-            transition={{ type: "timing", duration: MODAL_ANIMATION_DURATION }}
-            style={styles.modalContainer}
-          >
-            <BlurView intensity={90} style={styles.modalBlur}>
-              <View style={styles.modalContent}>
-                <View style={styles.modalHeader}>
-                  <Text style={styles.modalTitle}>記錄血壓</Text>
-                  <Pressable onPress={handleCloseQuickRecord} style={styles.closeButton}>
-                    <FontAwesome5 name="times" size={20} color="#8e8e93" />
-                  </Pressable>
-                </View>
-                <BloodPressureInput />
-              </View>
-            </BlurView>
-          </MotiView>
+          <>
+            <MotiView from={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ type: "timing", duration: 200 }} style={styles.modalOverlay} />
+            <MotiView
+              from={{ translateY: 1000, opacity: 0 }}
+              animate={{ translateY: 0, opacity: 1 }}
+              exit={{ translateY: 1000, opacity: 0 }}
+              transition={{ type: "timing", duration: MODAL_ANIMATION_DURATION }}
+              style={styles.modalContainer}
+            >
+              <BloodPressureInput onClose={handleCloseQuickRecord} onSave={handleSaveRecord} />
+            </MotiView>
+          </>
         )}
       </AnimatePresence>
     </View>
@@ -532,37 +540,17 @@ const styles = StyleSheet.create({
     height: 200,
     marginTop: 8,
   },
-  modalContainer: {
+  modalOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "flex-end",
+    backgroundColor: "rgba(0,0,0,0.3)",
+    backdropFilter: "blur(5px)",
   },
-  modalBlur: {
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    overflow: "hidden",
-  },
-  modalContent: {
-    padding: 20,
-  },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: "#1c1c1e",
-  },
-  closeButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(142,142,147,0.1)",
-    alignItems: "center",
-    justifyContent: "center",
+  modalContainer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "transparent",
   },
   statsContainer: {
     flexDirection: "row",
