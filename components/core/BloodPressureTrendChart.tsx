@@ -75,8 +75,8 @@ export function BloodPressureTrendChart({ data, period, onPointPress, chartWidth
         data={lineData}
         width={chartWidth}
         height={CHART_HEIGHT}
-        spacing={40}
-        initialSpacing={0}
+        spacing={45}
+        initialSpacing={45}
         endSpacing={0}
         thickness={2}
         hideDataPoints={false}
@@ -91,6 +91,7 @@ export function BloodPressureTrendChart({ data, period, onPointPress, chartWidth
         yAxisLabelWidth={35}
         yAxisLabelContainerStyle={styles.yAxisLabelContainer}
         xAxisLabelTextStyle={styles.xAxisLabelText}
+        xAxisTextNumberOfLines={1}
         yAxisTextNumberOfLines={1}
         hideYAxisText={false}
         showVerticalLines
