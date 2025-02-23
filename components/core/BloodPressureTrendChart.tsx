@@ -38,11 +38,13 @@ export function BloodPressureTrendChart({ data, period, onPointPress, chartWidth
       case "day":
         return value.split(" ")[1];
       case "week":
-        return value.split("/")[1];
+        const [month, day] = value.split("/");
+        return `${day}日`;
       case "month":
-        return value.split("/")[1];
+        const [_, date] = value.split("/");
+        return `${date}日`;
       case "year":
-        return value.split("/")[0] + "月";
+        return `${value.split("/")[0]}月`;
       default:
         return value;
     }
