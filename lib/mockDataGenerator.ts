@@ -10,8 +10,8 @@ const generateRandomNumber = (min: number, max: number) => {
 // 生成數據點
 const generateDataPoint = (date: Date): TrendDataPoint => {
   return {
-    systolic: generateRandomNumber(110, 140),
-    diastolic: generateRandomNumber(70, 90),
+    systolic: generateRandomNumber(110, 130),
+    diastolic: generateRandomNumber(60, 85),
     pulse: generateRandomNumber(60, 100),
     time: format(date, "MM/dd", { locale: zhTW }),
     timestamp: date.getTime(),

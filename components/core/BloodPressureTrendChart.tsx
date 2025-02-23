@@ -27,28 +27,12 @@ interface ChartDataPoint {
 
 const SCREEN_WIDTH = Dimensions.get("window").width - 40;
 const CHART_PADDING = 16;
+const SYSTOLIC_COLOR = "#FF3B30"; // 收縮壓改用紅色
+const DIASTOLIC_COLOR = "#007AFF"; // 舒張壓改用藍色
+const CHART_HEIGHT = 200; // 減少圖表高度
 
 export function BloodPressureTrendChart({ data, period, onPointPress, chartWidth = SCREEN_WIDTH }: Props) {
-  // 轉換數據格式
-  const lineData = useMemo(() => {
-    return data.map(
-      (point): ChartDataPoint => ({
-        value: point.systolic,
-        secondaryValue: point.diastolic,
-        label: point.time,
-        dataPointText: point.systolic.toString(),
-      })
-    );
-  }, [data]);
-
-  // 計算Y軸範圍
-  const yAxisRange = useMemo(() => {
-    const allValues = [...data.map(d => d.systolic), ...data.map(d => d.diastolic)];
-    const minValue = Math.floor(Math.min(...allValues) / 10) * 10;
-    const maxValue = Math.ceil(Math.max(...allValues) / 10) * 10;
-    return { min: minValue, max: maxValue };
-  }, [data]);
-
+  // 處理 X 軸標籤格式
   const getXLabel = (value: string) => {
     switch (period) {
       case "day":
@@ -64,39 +48,59 @@ export function BloodPressureTrendChart({ data, period, onPointPress, chartWidth
     }
   };
 
+  // 轉換數據格式
+  const lineData = useMemo(() => {
+    return data.map(
+      (point): ChartDataPoint => ({
+        value: point.systolic,
+        secondaryValue: point.diastolic,
+        label: getXLabel(point.time),
+        dataPointText: point.systolic.toString(),
+      })
+    );
+  }, [data, period]);
+
+  // 計算Y軸範圍
+  const yAxisRange = useMemo(() => {
+    const allValues = [...data.map(d => d.systolic), ...data.map(d => d.diastolic)];
+    const minValue = Math.floor(Math.min(...allValues) / 10) * 10;
+    const maxValue = Math.ceil(Math.max(...allValues) / 10) * 10;
+    return { min: minValue, max: maxValue };
+  }, [data]);
+
   return (
     <View style={styles.container}>
       {/* @ts-ignore */}
       <LineChart
         data={lineData}
-        width={chartWidth - CHART_PADDING * 2}
-        height={240}
+        width={chartWidth}
+        height={CHART_HEIGHT}
         spacing={40}
-        initialSpacing={10}
-        endSpacing={10}
+        initialSpacing={0}
+        endSpacing={0}
         thickness={2}
         hideDataPoints={false}
-        dataPointsColor="#7F3DFF"
-        dataPointsRadius={3}
-        color="#7F3DFF"
-        startOpacity={0.9}
-        endOpacity={0.2}
+        dataPointsColor={SYSTOLIC_COLOR}
+        dataPointsRadius={4}
+        color={SYSTOLIC_COLOR}
+        startOpacity={1}
+        endOpacity={1}
         xAxisColor="rgba(142,142,147,0.3)"
         yAxisColor="rgba(142,142,147,0.3)"
         yAxisTextStyle={styles.yAxisText}
-        yAxisLabelWidth={40}
+        yAxisLabelWidth={30}
         yAxisLabelContainerStyle={styles.yAxisLabelContainer}
         xAxisLabelTextStyle={styles.xAxisLabelText}
         yAxisTextNumberOfLines={1}
         hideYAxisText={false}
         showVerticalLines
         maxValue={yAxisRange.max}
-        minValue={yAxisRange.min}
+        noOfSections={5}
+        yAxisOffset={yAxisRange.min}
         formatYLabel={(label: any) => {
           const value = parseFloat(label);
           return isNaN(value) ? label : Math.round(value).toString();
         }}
-        formatXLabel={getXLabel}
         onPress={(item: ChartDataPoint, index: number) => {
           if (onPointPress) {
             onPointPress(data[index]);
@@ -105,25 +109,29 @@ export function BloodPressureTrendChart({ data, period, onPointPress, chartWidth
         secondaryData={lineData.map(item => ({
           ...item,
           value: data[lineData.indexOf(item)].diastolic,
-          dataPointsColor: "#5D5FEF",
-          color: "#5D5FEF",
+          dataPointsColor: DIASTOLIC_COLOR,
+          color: DIASTOLIC_COLOR,
+          dataPointsRadius: 4,
+          thickness: 2,
         }))}
         secondaryLineConfig={{
-          color: "#5D5FEF",
+          color: DIASTOLIC_COLOR,
           thickness: 2,
-          dataPointsRadius: 3,
-          dataPointsColor: "#5D5FEF",
+          dataPointsRadius: 4,
+          dataPointsColor: DIASTOLIC_COLOR,
+          startOpacity: 1,
+          endOpacity: 1,
         }}
       />
 
       {/* 圖例 */}
       <View style={styles.legend}>
         <View style={styles.legendItem}>
-          <View style={[styles.legendColor, { backgroundColor: "#7F3DFF" }]} />
+          <View style={[styles.legendColor, { backgroundColor: SYSTOLIC_COLOR }]} />
           <Text style={styles.legendText}>收縮壓</Text>
         </View>
         <View style={styles.legendItem}>
-          <View style={[styles.legendColor, { backgroundColor: "#5D5FEF" }]} />
+          <View style={[styles.legendColor, { backgroundColor: DIASTOLIC_COLOR }]} />
           <Text style={styles.legendText}>舒張壓</Text>
         </View>
       </View>
@@ -139,22 +147,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   yAxisText: {
-    fontSize: 10,
+    fontSize: 12,
     color: "rgba(142,142,147,0.8)",
-    marginRight: 4,
+    marginRight: 0,
   },
   xAxisLabelText: {
-    fontSize: 10,
+    fontSize: 12,
     color: "rgba(142,142,147,0.8)",
     marginTop: 4,
   },
   yAxisLabelContainer: {
-    marginRight: 4,
+    marginRight: 0,
   },
   legend: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: 16,
+    marginTop: 8,
     gap: 20,
   },
   legendItem: {

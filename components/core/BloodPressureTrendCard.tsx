@@ -63,7 +63,7 @@ export function BloodPressureTrendCard({ data, stats, period, onPeriodChange, on
       </View>
 
       <View style={styles.chartContainer}>
-        <BloodPressureTrendChart data={data} period={period} onPointPress={onPointPress} chartWidth={SCREEN_WIDTH - CHART_PADDING * 4} />
+        <BloodPressureTrendChart data={data} period={period} onPointPress={onPointPress} chartWidth={SCREEN_WIDTH - CHART_PADDING * 2} />
       </View>
     </MotiView>
   );
@@ -134,5 +134,6 @@ const styles = StyleSheet.create({
   chartContainer: {
     width: "100%",
     alignItems: "center",
+    marginHorizontal: -CHART_PADDING,
   },
 });
