@@ -213,7 +213,7 @@ export default function HomeScreen() {
               <Text style={styles.trendChartTitle}>血壓趨勢</Text>
               <TimePeriodSelector selectedPeriod={selectedPeriod} onPeriodChange={handlePeriodChange} />
             </View>
-            <BloodPressureTrendChart data={trendState.data} onPointPress={handlePointPress} />
+            <BloodPressureTrendChart data={trendState.data} period={selectedPeriod} onPointPress={handlePointPress} />
             <View style={styles.statsContainer}>
               <View style={styles.statItem}>
                 <Text style={styles.statLabel}>平均收縮壓</Text>

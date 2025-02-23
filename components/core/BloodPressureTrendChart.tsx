@@ -6,9 +6,10 @@ import { TrendDataPoint, TimePeriod } from "../../types/bloodPressure";
 interface Props {
   data: TrendDataPoint[];
   period: TimePeriod;
+  onPointPress?: (point: TrendDataPoint) => void;
 }
 
-export function BloodPressureTrendChart({ data, period }: Props) {
+export function BloodPressureTrendChart({ data, period, onPointPress }: Props) {
   const chartData = {
     labels: data.map(point => point.time),
     datasets: [
@@ -87,7 +88,7 @@ export function BloodPressureTrendChart({ data, period }: Props) {
         }}
         renderDotContent={({ x, y, index, indexData }) => (
           <Text
-            key={index}
+            key={`${index}-${indexData}-${x}-${y}`}
             style={[
               styles.dotLabel,
               {
