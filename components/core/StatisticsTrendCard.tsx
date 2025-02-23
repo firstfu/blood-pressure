@@ -6,8 +6,8 @@
  * @description: 專門為統計頁面設計的血壓趨勢圖表組件
  */
 
-import React from "react";
-import { View, Text, StyleSheet, Platform, Dimensions } from "react-native";
+import React, { useMemo } from "react";
+import { View, Text, StyleSheet, Platform, Dimensions, useWindowDimensions } from "react-native";
 import { TimePeriodSelector } from "../ui/TimePeriodSelector";
 import { BloodPressureTrendChart } from "./BloodPressureTrendChart";
 import { TimePeriod, TrendDataPoint, BloodPressureStats } from "../../types/bloodPressure";
@@ -24,10 +24,18 @@ interface Props {
   onPointPress?: (point: TrendDataPoint) => void;
 }
 
-const SCREEN_WIDTH = Dimensions.get("window").width;
 const CHART_PADDING = 20;
 
 export function StatisticsTrendCard({ data, stats, period, onPeriodChange, onPointPress }: Props) {
+  const { width: windowWidth } = useWindowDimensions();
+
+  // 計算圖表實際寬度
+  const chartWidth = useMemo(() => {
+    const containerPadding = CHART_PADDING * 2; // 容器的左右padding
+    const chartPadding = CHART_PADDING * 2; // 圖表的左右padding
+    return windowWidth - (containerPadding + chartPadding + 32); // 32 是額外的安全邊距
+  }, [windowWidth]);
+
   return (
     <MotiView style={styles.container}>
       <View style={styles.header}>
@@ -74,7 +82,7 @@ export function StatisticsTrendCard({ data, stats, period, onPeriodChange, onPoi
       </View>
 
       <View style={styles.chartContainer}>
-        <BloodPressureTrendChart data={data} period={period} onPointPress={onPointPress} chartWidth={SCREEN_WIDTH - CHART_PADDING * 4} />
+        <BloodPressureTrendChart data={data} period={period} onPointPress={onPointPress} chartWidth={chartWidth} />
       </View>
     </MotiView>
   );
