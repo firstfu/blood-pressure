@@ -4,17 +4,17 @@
 
 ### 視覺風格
 
-- 簡約現代：採用極簡設計，減少視覺干擾
-- 醫療專業：使用藍色為主色調，營造專業可靠的感覺
+- 簡約溫暖：採用自然柔和的設計，減少視覺壓力
+- 放鬆友善：使用柔和的灰綠色為主色調，營造輕鬆愉悅的感覺
 - 清晰易讀：重要數據採用大字體，確保清晰可見
 - 柔和圓角：所有元件採用圓角設計，提供友善的視覺體驗
 
 ### 關鍵設計元素
 
-- 數據展示卡片：採用白色背景、大字體顯示血壓數值
-- 狀態指示：使用漸層色彩條顯示血壓狀態（綠色-黃色-橙色-紅色）
+- 數據展示卡片：採用溫暖米色背景、大字體顯示血壓數值
+- 狀態指示：使用柔和漸層色彩條顯示血壓狀態（薄荷綠-杏桃色-磚紅色）
 - 醫生圖示：使用友善的醫生卡通圖像增加親和力
-- 數據圖表：採用簡潔的線條和柔和的色彩展示趨勢
+- 數據圖表：採用自然色調和柔和的線條展示趨勢
 
 ### 交互設計
 
@@ -29,22 +29,28 @@
 
 ```scss
 // 主要色彩
-$primary-blue: #2d87ff; // 主色調，代表專業醫療
-$success-green: #34c759; // 健康狀態良好
-$warning-yellow: #ffd60a; // 需要注意
-$danger-red: #ff3b30; // 需要警惕
+$primary: #7c9d96; // 主色調，柔和的灰綠色
+$secondary: #e9b384; // 次要色調，溫暖的杏桃色
+$success: #a8c7bb; // 正常值，柔和的薄荷綠
+$warning: #e9b384; // 需要注意，溫暖的杏桃色
+$danger: #ce7777; // 異常值，柔和的磚紅色
 
 // 中性色彩
-$background: #f5f7fa; // 背景色
-$text-primary: #1c1c1e; // 主要文字
-$text-secondary: #8e8e93; // 次要文字
-$border: #e5e5ea; // 邊框
-$divider: #c6c6c8; // 分隔線
+$background: #f8f4ea; // 背景色，溫暖的米色
+$text-primary: #435b66; // 主要文字，深灰藍色
+$text-secondary: #94a7ae; // 次要文字，中性灰色
+$border: #e8e5e0; // 邊框，溫暖的淺灰
+$divider: #e8e5e0; // 分隔線，溫暖的淺灰
 
 // 狀態色彩
-$active: rgba(45, 135, 255, 0.1); // 激活狀態
-$hover: rgba(45, 135, 255, 0.05); // 懸浮狀態
-$disabled: rgba(142, 142, 147, 0.1); // 禁用狀態
+$active: rgba(124, 157, 150, 0.1); // 激活狀態
+$hover: rgba(124, 157, 150, 0.05); // 懸浮狀態
+$disabled: rgba(148, 167, 174, 0.1); // 禁用狀態
+
+// 圖表色彩
+$chart-systolic: #7c9d96; // 收縮壓
+$chart-diastolic: #a8c7bb; // 舒張壓
+$chart-pulse: #e9b384; // 脈搏
 ```
 
 ### 字體系統
@@ -89,7 +95,7 @@ $spacing-xl: $spacing-unit * 5; // 40px
 .button {
   // 主要按鈕
   &--primary {
-    background-color: $primary-blue;
+    background-color: $primary;
     color: white;
     border-radius: 12px;
     padding: $spacing-sm $spacing-md;
@@ -98,18 +104,18 @@ $spacing-xl: $spacing-unit * 5; // 40px
   // 次要按鈕
   &--secondary {
     background-color: white;
-    color: $primary-blue;
-    border: 1px solid $primary-blue;
+    color: $primary;
+    border: 1px solid $primary;
   }
 
   // 警告按鈕
   &--warning {
-    background-color: $warning-yellow;
+    background-color: $warning;
   }
 
   // 危險按鈕
   &--danger {
-    background-color: $danger-red;
+    background-color: $danger;
   }
 }
 ```
@@ -148,8 +154,8 @@ $spacing-xl: $spacing-unit * 5; // 40px
   font-size: $font-size-body;
 
   &:focus {
-    border-color: $primary-blue;
-    box-shadow: 0 0 0 2px rgba($primary-blue, 0.1);
+    border-color: $primary;
+    box-shadow: 0 0 0 2px rgba($primary, 0.1);
   }
 }
 
@@ -291,7 +297,7 @@ $icon-sizes: (
   width: 24px;
   height: 24px;
   border: 2px solid $border;
-  border-top-color: $primary-blue;
+  border-top-color: $primary;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }

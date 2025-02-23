@@ -11,6 +11,7 @@ import { generateTrendData } from "../../lib/mockDataGenerator";
 import { TimePeriod, TrendDataPoint, BloodPressureStats } from "../../types/bloodPressure";
 import { useRouter } from "expo-router";
 import { BloodPressureTrendCard } from "../../components/core/BloodPressureTrendCard";
+import { Colors } from "../../constants/Colors";
 
 interface TrendState {
   data: TrendDataPoint[];
@@ -107,7 +108,7 @@ export default function HomeScreen() {
       {/* 新設計的頂部區域 */}
       <Animated.View style={[styles.headerContainer, { opacity: fadeAnim }]}>
         <BlurView intensity={80} tint="dark" style={styles.headerBlur}>
-          <LinearGradient colors={["#7F3DFF", "#5D5FEF"]} style={styles.headerGradient}>
+          <LinearGradient colors={[Colors.light.primary, Colors.light.secondary]} style={styles.headerGradient}>
             <SafeAreaView>
               <View style={styles.header}>
                 <View style={styles.headerContent}>
@@ -144,47 +145,47 @@ export default function HomeScreen() {
         <MotiView from={{ translateY: 50, opacity: 0 }} animate={{ translateY: 0, opacity: 1 }} transition={{ type: "timing", duration: 800 }} style={styles.mainContent}>
           {/* 最新記錄卡片 */}
           <View style={styles.latestRecordCard}>
-            <LinearGradient colors={["#ffffff", "#F9F5FF"]} style={styles.cardGradient}>
+            <LinearGradient colors={[Colors.light.background, Colors.light.background]} style={styles.cardGradient}>
               <View style={styles.latestRecordHeader}>
-                <View style={styles.latestRecordIcon}>
-                  <FontAwesome5 name="heart" size={16} color="#7F3DFF" />
+                <View style={[styles.latestRecordIcon, { backgroundColor: `${Colors.light.primary}1A` }]}>
+                  <FontAwesome5 name="heart" size={16} color={Colors.light.primary} />
                 </View>
-                <Text style={styles.latestRecordTitle}>最新記錄</Text>
-                <Text style={styles.latestRecordTime}>今天 15:32</Text>
+                <Text style={[styles.latestRecordTitle, { color: Colors.light.text }]}>最新記錄</Text>
+                <Text style={[styles.latestRecordTime, { color: Colors.light.textSecondary }]}>今天 15:32</Text>
               </View>
 
               <View style={styles.bpReadingsContainer}>
                 <View style={styles.bpReadingItem}>
-                  <Text style={styles.bpLabel}>收縮壓</Text>
+                  <Text style={[styles.bpLabel, { color: Colors.light.textSecondary }]}>收縮壓</Text>
                   <View style={styles.bpValueContainer}>
-                    <Text style={[styles.bpValue, { color: "#7F3DFF" }]}>120</Text>
-                    <Text style={styles.bpUnit}>mmHg</Text>
+                    <Text style={[styles.bpValue, { color: Colors.light.primary }]}>120</Text>
+                    <Text style={[styles.bpUnit, { color: Colors.light.textSecondary }]}>mmHg</Text>
                   </View>
                 </View>
 
                 <View style={styles.bpReadingItem}>
-                  <Text style={styles.bpLabel}>舒張壓</Text>
+                  <Text style={[styles.bpLabel, { color: Colors.light.textSecondary }]}>舒張壓</Text>
                   <View style={styles.bpValueContainer}>
-                    <Text style={[styles.bpValue, { color: "#5D5FEF" }]}>80</Text>
-                    <Text style={styles.bpUnit}>mmHg</Text>
+                    <Text style={[styles.bpValue, { color: Colors.light.secondary }]}>80</Text>
+                    <Text style={[styles.bpUnit, { color: Colors.light.textSecondary }]}>mmHg</Text>
                   </View>
                 </View>
 
                 <View style={styles.bpReadingItem}>
-                  <Text style={styles.bpLabel}>心率</Text>
+                  <Text style={[styles.bpLabel, { color: Colors.light.textSecondary }]}>心率</Text>
                   <View style={styles.bpValueContainer}>
-                    <Text style={[styles.bpValue, { color: "#34C759" }]}>75</Text>
-                    <Text style={styles.bpUnit}>BPM</Text>
+                    <Text style={[styles.bpValue, { color: Colors.light.success }]}>75</Text>
+                    <Text style={[styles.bpUnit, { color: Colors.light.textSecondary }]}>BPM</Text>
                   </View>
                 </View>
               </View>
 
               <View style={styles.bpStatusContainer}>
-                <View style={styles.bpStatusBar}>
-                  <LinearGradient colors={["#34C759", "#34C759"]} style={[styles.bpStatusIndicator, { width: "30%" }]} start={[0, 0]} end={[1, 0]} />
+                <View style={[styles.bpStatusBar, { backgroundColor: `${Colors.light.success}1A` }]}>
+                  <LinearGradient colors={[Colors.light.success, Colors.light.success]} style={[styles.bpStatusIndicator, { width: "30%" }]} start={[0, 0]} end={[1, 0]} />
                 </View>
-                <Text style={styles.bpStatusText}>正常</Text>
-                <Text style={styles.bpRangeText}>收縮壓 90-119 且舒張壓 60-79</Text>
+                <Text style={[styles.bpStatusText, { color: Colors.light.success }]}>正常</Text>
+                <Text style={[styles.bpRangeText, { color: Colors.light.textSecondary }]}>收縮壓 90-119 且舒張壓 60-79</Text>
               </View>
             </LinearGradient>
           </View>
@@ -192,19 +193,19 @@ export default function HomeScreen() {
           {/* 功能按鈕區 */}
           <View style={styles.actionButtonsContainer}>
             <Pressable style={styles.actionButton} onPress={() => router.push("/camera")}>
-              <View style={[styles.actionButtonIcon, { backgroundColor: "rgba(52,199,89,0.1)" }]}>
-                <FontAwesome5 name="camera" size={20} color="#34C759" />
+              <View style={[styles.actionButtonIcon, { backgroundColor: `${Colors.light.success}1A` }]}>
+                <FontAwesome5 name="camera" size={20} color={Colors.light.success} />
               </View>
-              <Text style={styles.actionButtonText}>拍照識別</Text>
-              <Text style={styles.actionButtonSubtext}>快速輸入</Text>
+              <Text style={[styles.actionButtonText, { color: Colors.light.text }]}>拍照識別</Text>
+              <Text style={[styles.actionButtonSubtext, { color: Colors.light.textSecondary }]}>快速輸入</Text>
             </Pressable>
 
             <Pressable style={styles.actionButton} onPress={() => router.push("/statistics")}>
-              <View style={[styles.actionButtonIcon, { backgroundColor: "rgba(255,159,64,0.1)" }]}>
-                <FontAwesome5 name="chart-line" size={20} color="#FF9F40" />
+              <View style={[styles.actionButtonIcon, { backgroundColor: `${Colors.light.secondary}1A` }]}>
+                <FontAwesome5 name="chart-line" size={20} color={Colors.light.secondary} />
               </View>
-              <Text style={styles.actionButtonText}>血壓趨勢</Text>
-              <Text style={styles.actionButtonSubtext}>查看分析</Text>
+              <Text style={[styles.actionButtonText, { color: Colors.light.text }]}>血壓趨勢</Text>
+              <Text style={[styles.actionButtonSubtext, { color: Colors.light.textSecondary }]}>查看分析</Text>
             </Pressable>
           </View>
 

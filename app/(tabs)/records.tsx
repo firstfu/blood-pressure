@@ -3,6 +3,8 @@ import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { MotiView } from "moti";
 import { useState } from "react";
+import { Colors } from "@/constants/Colors";
+import { Typography } from "../../constants/Typography";
 
 interface BloodPressureRecord {
   id: string;
@@ -505,8 +507,9 @@ export default function RecordsScreen() {
     }
   };
 
-  const handleFilterPress = (filter: string) => {
-    setActiveFilter(filter);
+  const handleFilterPress = () => {
+    // TODO: 實現篩選功能
+    console.log("Filter pressed");
   };
 
   const handleSearchPress = () => {
@@ -786,107 +789,85 @@ export default function RecordsScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.headerContainer}>
-        <LinearGradient colors={["#2d87ff", "#1a6cd4"]} start={[0, 0]} end={[1, 1]} style={styles.headerGradient}>
-          <SafeAreaView>
-            <View style={styles.header}>
-              <View style={styles.headerContent}>
-                <Text style={styles.headerTitle}>血壓記錄</Text>
-                <Text style={styles.headerSubtitle}>共 {records.length} 筆記錄</Text>
-              </View>
-              <View style={styles.headerButtons}>
-                <Pressable style={({ pressed }) => [styles.iconButton, pressed && { opacity: 0.8 }]} onPress={handleSearchPress}>
-                  <FontAwesome name="search" size={18} color="#fff" />
-                </Pressable>
-                <Pressable style={({ pressed }) => [styles.iconButton, pressed && { opacity: 0.8 }]} onPress={handleAdvancedFilterPress}>
-                  <FontAwesome name="filter" size={18} color="#fff" />
-                </Pressable>
+      <LinearGradient colors={[Colors.light.primary, Colors.light.primary]} style={styles.headerGradient}>
+        <SafeAreaView>
+          <View style={styles.header}>
+            <View style={styles.headerContent}>
+              <Text style={styles.welcomeText}>血壓記錄</Text>
+              <View style={styles.dateWeatherContainer}>
+                <Text style={styles.dateText}>
+                  {new Date().toLocaleDateString("zh-TW", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </Text>
               </View>
             </View>
-          </SafeAreaView>
-        </LinearGradient>
-      </View>
-
-      <View style={styles.mainContent}>
-        <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent} showsVerticalScrollIndicator={false}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
-            <View style={styles.filterContainer}>
-              <Pressable style={[styles.filterButton, activeFilter === "all" && styles.filterButtonActive]} onPress={() => handleFilterPress("all")}>
-                <Text style={[styles.filterButtonText, activeFilter === "all" && styles.filterButtonTextActive]}>全部3記錄</Text>
+            <MotiView style={styles.headerButtons}>
+              <Pressable style={styles.iconButton} onPress={handleSearchPress}>
+                <FontAwesome5 name="search" size={16} color="#fff" />
               </Pressable>
-              <Pressable style={[styles.filterButton, activeFilter === "week" && styles.filterButtonActive]} onPress={() => handleFilterPress("week")}>
-                <Text style={[styles.filterButtonText, activeFilter === "week" && styles.filterButtonTextActive]}>本週</Text>
+              <Pressable style={styles.iconButton} onPress={handleFilterPress}>
+                <FontAwesome5 name="filter" size={16} color="#fff" />
               </Pressable>
-              <Pressable style={[styles.filterButton, activeFilter === "month" && styles.filterButtonActive]} onPress={() => handleFilterPress("month")}>
-                <Text style={[styles.filterButtonText, activeFilter === "month" && styles.filterButtonTextActive]}>本月</Text>
+              <Pressable style={styles.iconButton} onPress={handleAddPress}>
+                <FontAwesome5 name="plus" size={16} color="#fff" />
               </Pressable>
-              <Pressable style={[styles.filterButton, activeFilter === "abnormal" && styles.filterButtonActive]} onPress={() => handleFilterPress("abnormal")}>
-                <Text style={[styles.filterButtonText, activeFilter === "abnormal" && styles.filterButtonTextActive]}>異常記錄</Text>
-              </Pressable>
-            </View>
-          </ScrollView>
-
-          <View style={styles.recordsList}>
-            {getFilteredRecords().length == 0 ? (
-              <View style={styles.emptyState}>
-                <FontAwesome5 name="notes-medical" size={48} color="#8e8e93" />
-                <Text style={styles.emptyStateText}>{searchText ? "沒有符合的搜尋結果" : "尚無記錄"}</Text>
-                <Text style={styles.emptyStateSubtext}>{searchText ? "請嘗試其他搜尋條件" : "點擊右下角按鈕新增記錄"}</Text>
-              </View>
-            ) : (
-              getFilteredRecords().map((record, index) => (
-                <Pressable key={record.id} style={({ pressed }) => [styles.recordCardContainer, pressed && styles.recordCardPressed]} onPress={() => handleEdit(record)}>
-                  <MotiView
-                    style={styles.recordCard}
-                    from={{ opacity: 0, translateY: 20 }}
-                    animate={{ opacity: 1, translateY: 0 }}
-                    transition={{ type: "timing", duration: 500, delay: index * 100 }}
-                  >
-                    <View style={styles.recordHeader}>
-                      <View style={styles.recordDateContainer}>
-                        <FontAwesome5 name="calendar-alt" size={14} color="#8e8e93" />
-                        <Text style={styles.recordDate}>{formatDate(record.date)}</Text>
-                        <Text style={styles.recordTime}>{record.time}</Text>
-                      </View>
-                      <View style={styles.actionButtons}>
-                        <Pressable style={styles.actionButton} onPress={() => handleEdit(record)}>
-                          <FontAwesome5 name="edit" size={14} color="#7F3DFF" />
-                        </Pressable>
-                        <Pressable style={styles.actionButton} onPress={() => handleDelete(record.id)}>
-                          <FontAwesome5 name="trash-alt" size={14} color="#ff3b30" />
-                        </Pressable>
-                      </View>
-                    </View>
-                    <View style={styles.recordContent}>
-                      <View style={styles.recordItem}>
-                        <Text style={styles.recordLabel}>收縮壓</Text>
-                        <Text style={[styles.recordValue, { color: getStatusColor(record.systolic, record.diastolic) }]}>{record.systolic}</Text>
-                        <Text style={styles.recordUnit}>mmHg</Text>
-                      </View>
-                      <View style={styles.recordDivider} />
-                      <View style={styles.recordItem}>
-                        <Text style={styles.recordLabel}>舒張壓</Text>
-                        <Text style={[styles.recordValue, { color: getStatusColor(record.systolic, record.diastolic) }]}>{record.diastolic}</Text>
-                        <Text style={styles.recordUnit}>mmHg</Text>
-                      </View>
-                      <View style={styles.recordDivider} />
-                      <View style={styles.recordItem}>
-                        <Text style={styles.recordLabel}>心率</Text>
-                        <Text style={styles.recordValue}>{record.heartRate}</Text>
-                        <Text style={styles.recordUnit}>BPM</Text>
-                      </View>
-                    </View>
-                    {record.note && <Text style={styles.noteText}>{record.note}</Text>}
-                  </MotiView>
-                </Pressable>
-              ))
-            )}
+            </MotiView>
           </View>
-        </ScrollView>
-      </View>
+        </SafeAreaView>
+      </LinearGradient>
 
-      <SearchModal />
-      <AdvancedFilterModal />
+      <ScrollView style={styles.scrollView}>
+        {records.map(record => (
+          <MotiView
+            key={record.id}
+            from={{ opacity: 0, translateY: 20 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{ type: "timing", duration: 500 }}
+            style={[styles.recordCard, { backgroundColor: Colors.light.background }]}
+          >
+            <View style={styles.recordHeader}>
+              <View style={styles.dateTimeContainer}>
+                <Text style={[styles.date, { color: Colors.light.text }]}>{formatDate(record.date)}</Text>
+                <Text style={[styles.time, { color: Colors.light.textSecondary }]}>{record.time}</Text>
+              </View>
+              <View style={styles.actionButtons}>
+                <Pressable style={styles.actionButton} onPress={() => handleEdit(record)}>
+                  <FontAwesome5 name="edit" size={16} color={Colors.light.primary} />
+                </Pressable>
+                <Pressable style={styles.actionButton} onPress={() => handleDelete(record.id)}>
+                  <FontAwesome5 name="trash" size={16} color={Colors.light.danger} />
+                </Pressable>
+              </View>
+            </View>
+
+            <View style={styles.readingsContainer}>
+              <View style={styles.readingItem}>
+                <Text style={[styles.readingLabel, { color: Colors.light.textSecondary }]}>收縮壓</Text>
+                <Text style={[styles.readingValue, { color: Colors.light.systolic }]}>{record.systolic}</Text>
+                <Text style={[styles.readingUnit, { color: Colors.light.textSecondary }]}>mmHg</Text>
+              </View>
+
+              <View style={styles.readingItem}>
+                <Text style={[styles.readingLabel, { color: Colors.light.textSecondary }]}>舒張壓</Text>
+                <Text style={[styles.readingValue, { color: Colors.light.diastolic }]}>{record.diastolic}</Text>
+                <Text style={[styles.readingUnit, { color: Colors.light.textSecondary }]}>mmHg</Text>
+              </View>
+
+              <View style={styles.readingItem}>
+                <Text style={[styles.readingLabel, { color: Colors.light.textSecondary }]}>心率</Text>
+                <Text style={[styles.readingValue, { color: Colors.light.heartRate }]}>{record.heartRate}</Text>
+                <Text style={[styles.readingUnit, { color: Colors.light.textSecondary }]}>BPM</Text>
+              </View>
+            </View>
+
+            {record.note && <Text style={[styles.note, { color: Colors.light.textSecondary }]}>{record.note}</Text>}
+          </MotiView>
+        ))}
+      </ScrollView>
+
       <EditModal
         visible={editModalVisible}
         record={selectedRecord}
@@ -897,11 +878,9 @@ export default function RecordsScreen() {
         onSave={handleSaveEdit}
       />
 
-      <Pressable style={styles.fab} onPress={handleAddPress}>
-        <LinearGradient colors={["#2d87ff", "#1a6cd4"]} start={[0, 0]} end={[1, 1]} style={styles.fabGradient}>
-          <FontAwesome name="plus" size={24} color="#fff" />
-        </LinearGradient>
-      </Pressable>
+      <SearchModal />
+
+      <AdvancedFilterModal />
     </View>
   );
 }
@@ -909,116 +888,65 @@ export default function RecordsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f7fa",
-  },
-  headerContainer: {
-    width: "100%",
-    backgroundColor: "#2d87ff",
-    paddingTop: Platform.OS === "android" ? 40 : 0,
+    backgroundColor: Colors.light.background,
   },
   headerGradient: {
     width: "100%",
-    paddingTop: Platform.OS === "ios" ? 50 : 0,
+    paddingTop: Platform.OS === "android" ? 40 : 0,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    height: Platform.OS === "android" ? 80 : 72,
-    paddingTop: Platform.OS === "ios" ? 8 : 0,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
   },
   headerContent: {
     flex: 1,
   },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: "700",
+  welcomeText: {
+    fontSize: Typography.size.h2,
+    fontWeight: Typography.weight.bold,
     color: "#fff",
-    marginBottom: 4,
   },
-  headerSubtitle: {
-    fontSize: 14,
-    color: "rgba(255,255,255,0.8)",
+  dateWeatherContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 4,
+  },
+  dateText: {
+    fontSize: Typography.size.regular,
+    color: "rgba(255,255,255,0.9)",
   },
   headerButtons: {
     flexDirection: "row",
     gap: 12,
-    alignItems: "center",
   },
   iconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.15)",
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(255,255,255,0.2)",
     alignItems: "center",
     justifyContent: "center",
   },
   scrollView: {
     flex: 1,
-  },
-  scrollViewContent: {
-    flexGrow: 1,
-    paddingBottom: Platform.OS === "ios" ? 120 : 100,
-  },
-  mainContent: {
-    flex: 1,
-    backgroundColor: "#f5f7fa",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    marginTop: 0,
-    paddingTop: 16,
-  },
-  filterScroll: {
-    marginBottom: 20,
-    paddingTop: 8,
-  },
-  filterContainer: {
-    flexDirection: "row",
-    paddingHorizontal: 16,
-    gap: 12,
-  },
-  filterButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-    backgroundColor: "rgba(142,142,147,0.1)",
-    height: 40,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  filterButtonActive: {
-    backgroundColor: "#2d87ff",
-  },
-  filterButtonText: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#8e8e93",
-  },
-  filterButtonTextActive: {
-    color: "#fff",
-  },
-  recordsList: {
-    paddingHorizontal: 16,
-  },
-  recordCardContainer: {
-    marginBottom: 16,
-  },
-  recordCardPressed: {
-    opacity: 0.8,
-    transform: [{ scale: 0.98 }],
+    padding: 16,
   },
   recordCard: {
+    marginBottom: 16,
+    padding: 20,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
     backgroundColor: "#fff",
-    borderRadius: 20,
-    padding: 16,
     ...Platform.select({
       ios: {
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
+        shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
-        shadowRadius: 12,
+        shadowRadius: 4,
       },
       android: {
         elevation: 4,
@@ -1031,97 +959,50 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 16,
   },
-  recordDateContainer: {
+  dateTimeContainer: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
   },
-  recordDate: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#1c1c1e",
+  date: {
+    fontSize: Typography.size.large,
+    fontWeight: Typography.weight.semibold,
   },
-  recordTime: {
-    fontSize: 14,
-    color: "#8e8e93",
+  time: {
+    fontSize: Typography.size.regular,
   },
   actionButtons: {
     flexDirection: "row",
     gap: 12,
   },
   actionButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "rgba(142,142,147,0.1)",
-    alignItems: "center",
-    justifyContent: "center",
+    padding: 8,
   },
-  recordContent: {
+  readingsContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(142,142,147,0.1)",
+    marginBottom: 16,
   },
-  recordItem: {
-    flex: 1,
+  readingItem: {
     alignItems: "center",
   },
-  recordDivider: {
-    width: 1,
-    height: 40,
-    backgroundColor: "rgba(142,142,147,0.1)",
+  readingLabel: {
+    fontSize: Typography.size.regular,
+    marginBottom: 8,
   },
-  recordLabel: {
-    fontSize: 13,
-    color: "#8e8e93",
-    marginBottom: 6,
+  readingValue: {
+    fontSize: Typography.size.h2,
+    fontWeight: Typography.weight.bold,
+    lineHeight: Typography.size.h2 * Typography.lineHeight.tight,
   },
-  recordValue: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#1c1c1e",
-    marginBottom: 4,
+  readingUnit: {
+    fontSize: Typography.size.regular,
+    marginTop: 4,
   },
-  recordUnit: {
-    fontSize: 12,
-    color: "#8e8e93",
-  },
-  noteText: {
-    fontSize: 14,
-    color: "#8e8e93",
+  note: {
+    fontSize: Typography.size.regular,
     marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(142,142,147,0.1)",
-  },
-  fab: {
-    position: "absolute",
-    right: 20,
-    bottom: Platform.OS === "ios" ? 32 : 24,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.2,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 8,
-      },
-    }),
-  },
-  fabGradient: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 30,
-    alignItems: "center",
-    justifyContent: "center",
+    lineHeight: Typography.size.regular * Typography.lineHeight.normal,
   },
   modalOverlay: {
     flex: 1,
@@ -1132,7 +1013,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    paddingTop: 20,
+    paddingTop: 24,
     maxHeight: "90%",
   },
   modalHeader: {
@@ -1140,18 +1021,18 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
-    marginBottom: 20,
+    marginBottom: 24,
   },
   modalTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: "#1c1c1e",
+    fontSize: Typography.size.h3,
+    fontWeight: Typography.weight.bold,
+    color: Colors.light.text,
   },
   modalCloseButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#f5f7fa",
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: Colors.light.background,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -1205,22 +1086,6 @@ const styles = StyleSheet.create({
   },
   modalSaveButtonText: {
     color: "#fff",
-  },
-  emptyState: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 60,
-  },
-  emptyStateText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#8e8e93",
-    marginTop: 16,
-  },
-  emptyStateSubtext: {
-    fontSize: 14,
-    color: "#8e8e93",
-    marginTop: 8,
   },
   searchContainer: {
     padding: 16,

@@ -1,45 +1,119 @@
-import { StyleSheet, View, Text, ScrollView, Pressable, Platform } from "react-native";
+/**
+ * @file profile.tsx
+ * @author FirstFu
+ * @date 2024-03-21
+ * @module Screens/Profile
+ * @description 個人頁面
+ * 提供個人資料管理和系統設置功能：
+ * 1. 個人資料管理
+ * 2. 系統設置
+ * 3. 數據管理
+ * 4. 使用幫助
+ */
+
+import { StyleSheet, View, Text, ScrollView, Pressable, Platform, Image } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { MotiView } from "moti";
 import { router } from "expo-router";
+import { Colors } from "../../constants/Colors";
 
 const menuItems = [
   {
-    icon: "user-circle",
+    id: "personal",
     title: "個人資料",
-    description: "設置您的個人信息",
-    link: "/profile/edit" as const,
+    items: [
+      {
+        icon: "user-circle",
+        title: "基本資料",
+        description: "設置您的個人信息",
+        link: "/profile/edit",
+      },
+      {
+        icon: "heart",
+        title: "健康資料",
+        description: "管理您的健康信息",
+        link: "/profile/health",
+      },
+    ],
   },
   {
-    icon: "bell",
-    title: "提醒設置",
-    description: "自定義測量提醒時間",
-    link: "/profile/notifications" as const,
+    id: "data",
+    title: "數據管理",
+    items: [
+      {
+        icon: "bell",
+        title: "測量提醒",
+        description: "自定義測量提醒時間",
+        link: "/profile/notifications",
+      },
+      {
+        icon: "chart-bar",
+        title: "數據統計",
+        description: "查看詳細的健康報告",
+        link: "/profile/statistics",
+      },
+      {
+        icon: "share-alt",
+        title: "數據分享",
+        description: "與醫生或家人分享數據",
+        link: "/profile/share",
+      },
+      {
+        icon: "file-export",
+        title: "數據導出",
+        description: "導出您的健康數據",
+        link: "/profile/export",
+      },
+    ],
   },
   {
-    icon: "chart-bar",
-    title: "數據統計",
-    description: "查看詳細的健康報告",
-    link: "/profile/statistics" as const,
-  },
-  {
-    icon: "share-alt",
-    title: "分享數據",
-    description: "與醫生或家人分享數據",
-    link: "/profile/share" as const,
-  },
-  {
-    icon: "book",
-    title: "使用教學",
-    description: "了解如何使用各項功能",
-    link: "/profile/tutorial" as const,
-  },
-  {
-    icon: "cog",
+    id: "system",
     title: "系統設置",
-    description: "調整應用程序設置",
-    link: "/profile/settings" as const,
+    items: [
+      {
+        icon: "palette",
+        title: "主題設置",
+        description: "自定義應用外觀",
+        link: "/profile/theme",
+      },
+      {
+        icon: "language",
+        title: "語言設置",
+        description: "切換應用語言",
+        link: "/profile/language",
+      },
+      {
+        icon: "shield-alt",
+        title: "隱私設置",
+        description: "管理數據隱私",
+        link: "/profile/privacy",
+      },
+    ],
+  },
+  {
+    id: "help",
+    title: "使用幫助",
+    items: [
+      {
+        icon: "book",
+        title: "使用教學",
+        description: "了解如何使用各項功能",
+        link: "/profile/tutorial",
+      },
+      {
+        icon: "question-circle",
+        title: "常見問題",
+        description: "查看常見問題解答",
+        link: "/profile/faq",
+      },
+      {
+        icon: "info-circle",
+        title: "關於我們",
+        description: "了解更多關於我們",
+        link: "/profile/about",
+      },
+    ],
   },
 ];
 
@@ -51,14 +125,14 @@ export default function ProfileScreen() {
   return (
     <View style={styles.container}>
       {/* 頂部個人信息卡片 */}
-      <LinearGradient colors={["#7F3DFF", "#5D5FEF"]} style={styles.header}>
+      <LinearGradient colors={[Colors.light.primary, Colors.light.secondary]} style={styles.header}>
         <MotiView from={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: "timing", duration: 500 }} style={styles.profileCard}>
-          <Pressable style={styles.avatarContainer} onPress={() => handleMenuPress("profile/edit")}>
+          <Pressable style={styles.avatarContainer} onPress={() => handleMenuPress("/profile/edit")}>
             <View style={styles.avatar}>
-              <FontAwesome5 name="user" size={32} color="#7F3DFF" />
+              <FontAwesome5 name="user" size={32} color={Colors.light.primary} />
             </View>
             <View style={styles.badgeContainer}>
-              <FontAwesome5 name="check-circle" size={16} color="#34C759" solid />
+              <FontAwesome5 name="check-circle" size={16} color={Colors.light.success} solid />
             </View>
           </Pressable>
           <Text style={styles.name}>王小明</Text>
@@ -79,27 +153,37 @@ export default function ProfileScreen() {
 
       {/* 選單列表 */}
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <MotiView
-          style={styles.menuContainer}
-          from={{ opacity: 0, translateY: 20 }}
-          animate={{ opacity: 1, translateY: 0 }}
-          transition={{ type: "timing", duration: 500, delay: 200 }}
-        >
-          {menuItems.map((item, index) => (
-            <Pressable key={item.link} style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]} onPress={() => handleMenuPress(item.link)}>
-              <View style={styles.menuIcon}>
-                <FontAwesome5 name={item.icon} size={20} color="#7F3DFF" />
-              </View>
-              <View style={styles.menuContent}>
-                <View>
-                  <Text style={styles.menuTitle}>{item.title}</Text>
-                  <Text style={styles.menuDescription}>{item.description}</Text>
-                </View>
-                <FontAwesome5 name="chevron-right" size={16} color="#C7C7CC" />
-              </View>
-            </Pressable>
-          ))}
-        </MotiView>
+        {menuItems.map((section, sectionIndex) => (
+          <MotiView
+            key={section.id}
+            style={styles.menuSection}
+            from={{ opacity: 0, translateY: 20 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{ type: "timing", duration: 500, delay: sectionIndex * 100 }}
+          >
+            <Text style={styles.sectionTitle}>{section.title}</Text>
+            <View style={styles.menuContainer}>
+              {section.items.map((item, index) => (
+                <Pressable
+                  key={item.link}
+                  style={({ pressed }) => [styles.menuItem, index !== section.items.length - 1 && styles.menuItemBorder, pressed && styles.menuItemPressed]}
+                  onPress={() => handleMenuPress(item.link)}
+                >
+                  <View style={[styles.menuIcon, { backgroundColor: `${Colors.light.primary}1A` }]}>
+                    <FontAwesome5 name={item.icon} size={20} color={Colors.light.primary} />
+                  </View>
+                  <View style={styles.menuContent}>
+                    <View>
+                      <Text style={styles.menuTitle}>{item.title}</Text>
+                      <Text style={styles.menuDescription}>{item.description}</Text>
+                    </View>
+                    <FontAwesome5 name="chevron-right" size={16} color={Colors.light.textSecondary} />
+                  </View>
+                </Pressable>
+              ))}
+            </View>
+          </MotiView>
+        ))}
 
         {/* 版本信息 */}
         <Text style={styles.version}>版本 1.0.0</Text>
@@ -111,7 +195,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f7fa",
+    backgroundColor: Colors.light.background,
   },
   header: {
     paddingTop: Platform.OS === "ios" ? 60 : 40,
@@ -145,7 +229,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: "rgba(127,61,255,0.1)",
+    backgroundColor: `${Colors.light.primary}1A`,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -171,13 +255,13 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 24,
     fontWeight: "700",
-    color: "#1c1c1e",
+    color: Colors.light.text,
     textAlign: "center",
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 14,
-    color: "#8e8e93",
+    color: Colors.light.textSecondary,
     textAlign: "center",
     marginBottom: 16,
   },
@@ -187,7 +271,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: "#f2f2f7",
+    borderTopColor: Colors.light.border,
   },
   statItem: {
     flex: 1,
@@ -196,35 +280,45 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 20,
     fontWeight: "600",
-    color: "#7F3DFF",
+    color: Colors.light.primary,
     marginBottom: 4,
   },
   statLabel: {
     fontSize: 12,
-    color: "#8e8e93",
+    color: Colors.light.textSecondary,
   },
   statDivider: {
     width: 1,
     height: 24,
-    backgroundColor: "#f2f2f7",
+    backgroundColor: Colors.light.border,
   },
   content: {
     flex: 1,
     marginTop: -40,
   },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: Colors.light.text,
+    marginHorizontal: 16,
+    marginBottom: 8,
+  },
+  menuSection: {
+    marginBottom: 24,
+  },
   menuContainer: {
-    margin: 16,
+    marginHorizontal: 16,
     backgroundColor: "#fff",
-    borderRadius: 24,
+    borderRadius: 16,
     ...Platform.select({
       ios: {
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 8 },
+        shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
-        shadowRadius: 24,
+        shadowRadius: 8,
       },
       android: {
-        elevation: 8,
+        elevation: 4,
       },
     }),
   },
@@ -232,17 +326,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 16,
+  },
+  menuItemBorder: {
     borderBottomWidth: 1,
-    borderBottomColor: "#f2f2f7",
+    borderBottomColor: Colors.light.border,
   },
   menuItemPressed: {
-    backgroundColor: "#f9f5ff",
+    backgroundColor: `${Colors.light.primary}0A`,
   },
   menuIcon: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "rgba(127,61,255,0.1)",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
@@ -255,18 +350,18 @@ const styles = StyleSheet.create({
   },
   menuTitle: {
     fontSize: 16,
-    fontWeight: "600",
-    color: "#1c1c1e",
-    marginBottom: 2,
+    fontWeight: "500",
+    color: Colors.light.text,
+    marginBottom: 4,
   },
   menuDescription: {
     fontSize: 13,
-    color: "#8e8e93",
+    color: Colors.light.textSecondary,
   },
   version: {
     fontSize: 12,
-    color: "#8e8e93",
+    color: Colors.light.textSecondary,
     textAlign: "center",
-    marginVertical: 20,
+    marginVertical: 24,
   },
 });

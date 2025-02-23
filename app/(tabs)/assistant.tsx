@@ -1,8 +1,22 @@
+/**
+ * @file assistant.tsx
+ * @author FirstFu
+ * @date 2024-03-21
+ * @module Screens/Assistant
+ * @description AI 助手頁面
+ * 提供智能健康諮詢和建議功能：
+ * 1. 血壓相關知識諮詢
+ * 2. 健康生活建議
+ * 3. 智能數據分析
+ * 4. 個人化建議
+ */
+
 import { StyleSheet, View, Text, SafeAreaView, ScrollView, Pressable, TextInput, Platform, KeyboardAvoidingView, Animated, Alert } from "react-native";
-import { FontAwesome } from "@expo/vector-icons";
+import { FontAwesome5 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useState, useRef, useEffect } from "react";
 import { MotiView } from "moti";
+import { Colors } from "../../constants/Colors";
 
 type Message = {
   id: string;
@@ -170,23 +184,21 @@ export default function AssistantScreen() {
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       {/* 頂部區域 */}
-      <View style={styles.headerContainer}>
-        <LinearGradient colors={["#2d87ff", "#1a6cd4"]} start={[0, 0]} end={[1, 1]} style={styles.headerGradient}>
-          <SafeAreaView>
-            <View style={styles.header}>
-              <Text style={styles.headerTitle}>AI 助手</Text>
-              <Pressable style={({ pressed }) => [styles.iconButton, pressed && { opacity: 0.8, transform: [{ scale: 0.95 }] }]} onPress={handleHelpPress}>
-                <FontAwesome name="question-circle" size={20} color="#fff" />
-              </Pressable>
-            </View>
-          </SafeAreaView>
-        </LinearGradient>
-      </View>
+      <LinearGradient colors={[Colors.light.primary, Colors.light.secondary]} style={styles.headerGradient}>
+        <SafeAreaView>
+          <View style={styles.header}>
+            <Text style={styles.headerTitle}>AI 助手</Text>
+            <Pressable style={({ pressed }) => [styles.iconButton, pressed && { opacity: 0.8 }]} onPress={handleHelpPress}>
+              <FontAwesome5 name="question-circle" size={20} color="#fff" />
+            </Pressable>
+          </View>
+        </SafeAreaView>
+      </LinearGradient>
 
       {/* 主要內容區 */}
       <View style={styles.mainContent}>
         {/* 快速提問建議 */}
-        <View style={styles.suggestionsContainer}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.suggestionsContainer} contentContainerStyle={styles.suggestionsContent}>
           {suggestions.map(suggestion => (
             <Pressable
               key={suggestion.id}
@@ -194,12 +206,12 @@ export default function AssistantScreen() {
               onPress={() => handleSuggestionPress(suggestion)}
             >
               <View style={[styles.suggestionIcon, { backgroundColor: `${suggestion.color}20` }]}>
-                <FontAwesome name={suggestion.icon} size={20} color={suggestion.color} />
+                <FontAwesome5 name={suggestion.icon} size={20} color={suggestion.color} />
               </View>
               <Text style={styles.suggestionText}>{suggestion.title}</Text>
             </Pressable>
           ))}
-        </View>
+        </ScrollView>
 
         {/* 對話區域 */}
         <ScrollView
@@ -218,7 +230,7 @@ export default function AssistantScreen() {
             >
               {message.type === "assistant" && (
                 <View style={styles.assistantAvatar}>
-                  <FontAwesome name="user-md" size={18} color="#fff" />
+                  <FontAwesome5 name="user-md" size={18} color="#fff" />
                 </View>
               )}
               <View style={[styles.messageBubble, message.type === "user" ? styles.userBubble : styles.assistantBubble]}>
@@ -231,13 +243,10 @@ export default function AssistantScreen() {
 
         {/* 輸入區域 */}
         <View style={styles.inputContainer}>
-          <Pressable style={({ pressed }) => [styles.inputButton, pressed && { opacity: 0.8, transform: [{ scale: 0.95 }] }]}>
-            <FontAwesome name="image" size={20} color="#8e8e93" />
-          </Pressable>
           <TextInput
             style={styles.input}
             placeholder="輸入您的問題..."
-            placeholderTextColor="#8e8e93"
+            placeholderTextColor={Colors.light.textSecondary}
             multiline
             value={inputText}
             onChangeText={setInputText}
@@ -245,8 +254,8 @@ export default function AssistantScreen() {
           />
           <Animated.View style={[styles.sendButton, { transform: [{ scale: sendButtonScale }] }]}>
             <Pressable onPress={handleSendMessage}>
-              <LinearGradient colors={["#2d87ff", "#1a6cd4"]} start={[0, 0]} end={[1, 1]} style={styles.sendButtonGradient}>
-                <FontAwesome name="send" size={16} color="#fff" />
+              <LinearGradient colors={[Colors.light.primary, Colors.light.secondary]} style={styles.sendButtonGradient}>
+                <FontAwesome5 name="paper-plane" size={16} color="#fff" />
               </LinearGradient>
             </Pressable>
           </Animated.View>
@@ -259,12 +268,7 @@ export default function AssistantScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f7fa",
-  },
-  headerContainer: {
-    width: "100%",
-    backgroundColor: "#2d87ff",
-    paddingTop: Platform.OS === "android" ? 20 : 0,
+    backgroundColor: Colors.light.background,
   },
   headerGradient: {
     width: "100%",
@@ -274,70 +278,70 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    height: Platform.OS === "android" ? 64 : 56,
-    paddingTop: Platform.OS === "android" ? 12 : 8,
+    paddingVertical: Platform.OS === "android" ? 16 : 8,
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: "700",
+    fontSize: 20,
+    fontWeight: "600",
     color: "#fff",
-    letterSpacing: 0.5,
   },
   iconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.15)",
-    alignItems: "center",
-    justifyContent: "center",
+    padding: 8,
   },
   mainContent: {
     flex: 1,
-    backgroundColor: "#f5f7fa",
   },
   suggestionsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    padding: 16,
-    backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(0,0,0,0.06)",
+    maxHeight: 100,
+    paddingVertical: 12,
+  },
+  suggestionsContent: {
+    paddingHorizontal: 16,
+    gap: 12,
   },
   suggestionButton: {
     alignItems: "center",
-    gap: 8,
-    padding: 8,
-    borderRadius: 12,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 12,
+    marginRight: 12,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
   suggestionIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    marginBottom: 8,
   },
   suggestionText: {
-    fontSize: 13,
-    color: "#1c1c1e",
-    fontWeight: "600",
+    fontSize: 12,
+    color: Colors.light.text,
+    fontWeight: "500",
   },
   chatContainer: {
     flex: 1,
+    paddingHorizontal: 16,
   },
   chatContent: {
-    padding: 16,
-    gap: 20,
+    paddingVertical: 16,
+    gap: 16,
   },
   messageContainer: {
     flexDirection: "row",
     alignItems: "flex-end",
-    gap: 8,
+    marginBottom: 8,
   },
   userMessage: {
     justifyContent: "flex-end",
@@ -346,112 +350,84 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   assistantAvatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#2d87ff",
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: Colors.light.primary,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    marginRight: 8,
   },
   messageBubble: {
-    maxWidth: "75%",
-    padding: 14,
-    borderRadius: 20,
-    backgroundColor: "#fff",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 2,
+    maxWidth: "70%",
+    padding: 12,
+    borderRadius: 16,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
   userBubble: {
-    backgroundColor: "#2d87ff",
-    borderBottomRightRadius: 6,
+    backgroundColor: Colors.light.primary,
+    borderBottomRightRadius: 4,
   },
   assistantBubble: {
     backgroundColor: "#fff",
-    borderBottomLeftRadius: 6,
+    borderBottomLeftRadius: 4,
   },
   messageText: {
-    fontSize: 15,
-    color: "#1c1c1e",
-    lineHeight: 22,
+    fontSize: 14,
+    color: Colors.light.text,
+    lineHeight: 20,
   },
   userMessageText: {
     color: "#fff",
   },
   messageTime: {
-    fontSize: 11,
-    color: "#8e8e93",
-    marginTop: 6,
+    fontSize: 12,
+    color: Colors.light.textSecondary,
+    marginTop: 4,
     alignSelf: "flex-end",
   },
   userMessageTime: {
-    color: "rgba(255,255,255,0.8)",
+    color: "rgba(255,255,255,0.7)",
   },
   inputContainer: {
     flexDirection: "row",
-    alignItems: "flex-end",
-    gap: 12,
-    padding: 16,
-    paddingTop: 12,
-    paddingBottom: Platform.OS === "ios" ? 34 : 16,
-    backgroundColor: "#fff",
-    borderTopWidth: 1,
-    borderTopColor: "rgba(0,0,0,0.06)",
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: -4 },
-        shadowOpacity: 0.08,
-        shadowRadius: 12,
-      },
-      android: {
-        elevation: 8,
-      },
-    }),
-  },
-  inputButton: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: "rgba(127,61,255,0.1)",
     alignItems: "center",
-    justifyContent: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: Colors.light.border,
+    backgroundColor: "#fff",
   },
   input: {
     flex: 1,
-    minHeight: 42,
-    maxHeight: 120,
+    minHeight: 40,
+    maxHeight: 100,
+    backgroundColor: Colors.light.background,
+    borderRadius: 20,
     paddingHorizontal: 16,
-    paddingVertical: 10,
-    backgroundColor: "rgba(142,142,147,0.08)",
-    borderRadius: 21,
-    fontSize: 15,
-    color: "#1c1c1e",
-    lineHeight: 20,
-    borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.06)",
+    paddingVertical: 8,
+    marginRight: 12,
+    fontSize: 14,
+    color: Colors.light.text,
   },
   sendButton: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 4,
+    width: 40,
+    height: 40,
   },
   sendButtonGradient: {
-    width: "100%",
-    height: "100%",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
   },

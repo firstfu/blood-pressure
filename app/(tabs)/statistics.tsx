@@ -29,8 +29,10 @@ import { TimePeriod, BloodPressureStats, TrendDataPoint } from "../../types/bloo
 import { BloodPressureTrendChart } from "../../components/core/BloodPressureTrendChart";
 import { TimePeriodSelector } from "../../components/ui/TimePeriodSelector";
 import { BloodPressureStats as StatsComponent } from "../../components/core/BloodPressureStats";
-import ViewShot, { ViewShotProperties } from "react-native-view-shot";
+import ViewShot from "react-native-view-shot";
 import { StatusBar } from "expo-status-bar";
+import { Colors } from "../../constants/Colors";
+import { Typography } from "../../constants/Typography";
 
 /**
  * 模擬血壓記錄數據
@@ -134,11 +136,20 @@ export default function StatisticsScreen() {
     <View style={styles.container}>
       <StatusBar style="light" />
       {/* Header */}
-      <LinearGradient colors={["#7F3DFF", "#5D5FEF"]} style={styles.headerGradient}>
+      <LinearGradient colors={[Colors.light.primary, Colors.light.secondary]} style={styles.headerGradient}>
         <SafeAreaView>
           <View style={styles.headerContent}>
-            <Text style={styles.headerTitle}>統計分析</Text>
-            <Pressable onPress={handleShare} style={styles.shareButton}>
+            <View>
+              <Text style={styles.headerTitle}>統計分析</Text>
+              <Text style={styles.headerSubtitle}>
+                {new Date().toLocaleDateString("zh-TW", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </Text>
+            </View>
+            <Pressable style={({ pressed }) => [styles.shareButton, pressed && styles.shareButtonPressed]} onPress={handleShare}>
               <FontAwesome5 name="share-alt" size={20} color="#fff" />
             </Pressable>
           </View>
@@ -146,36 +157,71 @@ export default function StatisticsScreen() {
       </LinearGradient>
 
       <ViewShot ref={viewShotRef} style={styles.mainContent}>
-        <ScrollView style={styles.scrollView}>
+        <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent} showsVerticalScrollIndicator={false}>
           {/* 統計概覽 */}
-          {stats && <StatsComponent stats={stats} />}
+          <MotiView from={{ opacity: 0, translateY: 20 }} animate={{ opacity: 1, translateY: 0 }} transition={{ type: "timing", duration: 500 }}>
+            {stats && <StatsComponent stats={stats} />}
+          </MotiView>
 
           {/* 時間週期選擇器 */}
-          <TimePeriodSelector selectedPeriod={selectedPeriod} onPeriodChange={handlePeriodChange} />
+          <MotiView
+            from={{ opacity: 0, translateY: 20 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{ type: "timing", duration: 500, delay: 100 }}
+            style={styles.periodSelectorContainer}
+          >
+            <TimePeriodSelector selectedPeriod={selectedPeriod} onPeriodChange={handlePeriodChange} />
+          </MotiView>
 
           {/* 趨勢圖表 */}
           {trendData.length > 0 && (
-            <MotiView style={styles.chartCard} from={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: "timing", duration: 500 }}>
-              <Text style={styles.cardTitle}>血壓趨勢</Text>
+            <MotiView
+              style={styles.chartCard}
+              from={{ opacity: 0, translateY: 20 }}
+              animate={{ opacity: 1, translateY: 0 }}
+              transition={{ type: "timing", duration: 500, delay: 200 }}
+            >
+              <View style={styles.cardHeader}>
+                <View style={styles.cardTitleContainer}>
+                  <View style={styles.cardIcon}>
+                    <FontAwesome5 name="chart-line" size={16} color={Colors.light.primary} />
+                  </View>
+                  <Text style={styles.cardTitle}>血壓趨勢</Text>
+                </View>
+              </View>
               <BloodPressureTrendChart data={trendData} period={selectedPeriod} />
             </MotiView>
           )}
 
           {/* 分布統計 */}
           {distribution.length > 0 && (
-            <MotiView style={styles.distributionCard} from={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: "timing", duration: 500 }}>
-              <Text style={styles.cardTitle}>血壓分布</Text>
+            <MotiView
+              style={styles.distributionCard}
+              from={{ opacity: 0, translateY: 20 }}
+              animate={{ opacity: 1, translateY: 0 }}
+              transition={{ type: "timing", duration: 500, delay: 300 }}
+            >
+              <View style={styles.cardHeader}>
+                <View style={styles.cardTitleContainer}>
+                  <View style={[styles.cardIcon, { backgroundColor: `${Colors.light.secondary}1A` }]}>
+                    <FontAwesome5 name="chart-pie" size={16} color={Colors.light.secondary} />
+                  </View>
+                  <Text style={styles.cardTitle}>血壓分布</Text>
+                </View>
+              </View>
               <View style={styles.distributionList}>
                 {distribution.map(item => (
                   <View key={item.category} style={styles.distributionItem}>
-                    <View style={styles.distributionBar}>
-                      <View style={[styles.distributionBarFill, { width: `${item.percentage}%` }, { backgroundColor: getStatusColor(item.category) }]} />
-                    </View>
-                    <View style={styles.distributionInfo}>
+                    <View style={styles.distributionLabelContainer}>
                       <Text style={styles.distributionLabel}>{getCategoryLabel(item.category)}</Text>
                       <Text style={styles.distributionValue}>
-                        {item.percentage}% ({item.count})
+                        {item.count}次 ({item.percentage}%)
                       </Text>
+                    </View>
+                    <View style={styles.distributionBarContainer}>
+                      <View style={styles.distributionBar}>
+                        <View style={[styles.distributionBarFill, { width: `${item.percentage}%`, backgroundColor: getStatusColor(item.category) }]} />
+                      </View>
                     </View>
                   </View>
                 ))}
@@ -196,17 +242,17 @@ export default function StatisticsScreen() {
 const getStatusColor = (category: string) => {
   switch (category) {
     case "normal":
-      return "#34c759";
+      return Colors.light.success;
     case "elevated":
-      return "#ffd60a";
+      return Colors.light.warning;
     case "high":
-      return "#ff3b30";
+      return Colors.light.danger;
     case "crisis":
-      return "#ff453a";
+      return Colors.light.danger;
     case "low":
-      return "#5856d6";
+      return Colors.light.secondary;
     default:
-      return "#8e8e93";
+      return Colors.light.textSecondary;
   }
 };
 
@@ -238,22 +284,28 @@ const getCategoryLabel = (category: string) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f7fa",
+    backgroundColor: Colors.light.background,
   },
   headerGradient: {
     width: "100%",
+    paddingTop: Platform.OS === "android" ? 40 : 0,
   },
   headerContent: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingVertical: 16,
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: "700",
+    fontSize: Typography.size.h2,
+    fontWeight: Typography.weight.bold,
     color: "#fff",
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: Typography.size.small,
+    color: "rgba(255,255,255,0.9)",
   },
   shareButton: {
     width: 40,
@@ -263,81 +315,108 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  shareButtonPressed: {
+    opacity: 0.8,
+  },
   mainContent: {
     flex: 1,
+    backgroundColor: Colors.light.background,
   },
   scrollView: {
     flex: 1,
+  },
+  scrollViewContent: {
     padding: 16,
+    paddingBottom: 32,
+  },
+  periodSelectorContainer: {
+    marginVertical: 16,
   },
   chartCard: {
     backgroundColor: "#fff",
-    borderRadius: 24,
-    padding: 20,
+    borderRadius: 20,
+    padding: 16,
     marginBottom: 16,
     ...Platform.select({
       ios: {
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 8 },
+        shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
-        shadowRadius: 24,
+        shadowRadius: 8,
       },
       android: {
-        elevation: 8,
+        elevation: 4,
       },
     }),
   },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#1c1c1e",
+  cardHeader: {
     marginBottom: 16,
+  },
+  cardTitleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  cardIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: `${Colors.light.primary}1A`,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  cardTitle: {
+    fontSize: Typography.size.large,
+    fontWeight: Typography.weight.semibold,
+    color: Colors.light.text,
   },
   distributionCard: {
     backgroundColor: "#fff",
-    borderRadius: 24,
-    padding: 20,
-    marginBottom: 16,
+    borderRadius: 20,
+    padding: 16,
     ...Platform.select({
       ios: {
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 8 },
+        shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
-        shadowRadius: 24,
+        shadowRadius: 8,
       },
       android: {
-        elevation: 8,
+        elevation: 4,
       },
     }),
   },
   distributionList: {
-    marginTop: 8,
+    gap: 16,
   },
   distributionItem: {
-    marginBottom: 12,
+    gap: 8,
+  },
+  distributionLabelContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  distributionLabel: {
+    fontSize: Typography.size.regular,
+    fontWeight: Typography.weight.medium,
+    color: Colors.light.text,
+  },
+  distributionValue: {
+    fontSize: Typography.size.small,
+    color: Colors.light.textSecondary,
+  },
+  distributionBarContainer: {
+    flex: 1,
   },
   distributionBar: {
     height: 8,
-    backgroundColor: "#f2f2f7",
+    backgroundColor: Colors.light.border,
     borderRadius: 4,
     overflow: "hidden",
   },
   distributionBarFill: {
     height: "100%",
     borderRadius: 4,
-  },
-  distributionInfo: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 4,
-  },
-  distributionLabel: {
-    fontSize: 14,
-    color: "#8e8e93",
-  },
-  distributionValue: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#1c1c1e",
   },
 });
