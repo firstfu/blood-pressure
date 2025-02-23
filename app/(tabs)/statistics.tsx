@@ -26,7 +26,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useBloodPressureStore } from "../../store/bloodPressureStore";
 import { analyzeBloodPressure, generateTrendData, calculateBPDistribution } from "../../lib/statisticsService";
 import { TimePeriod, BloodPressureStats, TrendDataPoint } from "../../types/bloodPressure";
-import { BloodPressureTrendChart } from "../../components/core/BloodPressureTrendChart";
+import { StatisticsTrendCard } from "../../components/core/StatisticsTrendCard";
 import { TimePeriodSelector } from "../../components/ui/TimePeriodSelector";
 import { BloodPressureStats as StatsComponent } from "../../components/core/BloodPressureStats";
 import ViewShot from "react-native-view-shot";
@@ -181,15 +181,33 @@ export default function StatisticsScreen() {
               animate={{ opacity: 1, translateY: 0 }}
               transition={{ type: "timing", duration: 500, delay: 200 }}
             >
-              <View style={styles.cardHeader}>
-                <View style={styles.cardTitleContainer}>
-                  <View style={styles.cardIcon}>
-                    <FontAwesome5 name="chart-line" size={16} color={Colors.light.primary} />
-                  </View>
-                  <Text style={styles.cardTitle}>血壓趨勢</Text>
-                </View>
-              </View>
-              <BloodPressureTrendChart data={trendData} period={selectedPeriod} />
+              <StatisticsTrendCard
+                data={trendData}
+                stats={
+                  stats || {
+                    average: { systolic: 0, diastolic: 0, heartRate: 0 },
+                    max: {
+                      id: "max-placeholder",
+                      systolic: 0,
+                      diastolic: 0,
+                      heartRate: 0,
+                      timestamp: 0,
+                      category: "morning",
+                    },
+                    min: {
+                      id: "min-placeholder",
+                      systolic: 0,
+                      diastolic: 0,
+                      heartRate: 0,
+                      timestamp: 0,
+                      category: "morning",
+                    },
+                    trend: "stable",
+                  }
+                }
+                period={selectedPeriod}
+                onPeriodChange={handlePeriodChange}
+              />
             </MotiView>
           )}
 
@@ -201,12 +219,10 @@ export default function StatisticsScreen() {
               animate={{ opacity: 1, translateY: 0 }}
               transition={{ type: "timing", duration: 500, delay: 300 }}
             >
-              <View style={styles.cardHeader}>
-                <View style={styles.cardTitleContainer}>
-                  <View style={[styles.cardIcon, { backgroundColor: `${Colors.light.secondary}1A` }]}>
-                    <FontAwesome5 name="chart-pie" size={16} color={Colors.light.secondary} />
-                  </View>
-                  <Text style={styles.cardTitle}>血壓分布</Text>
+              <View style={styles.distributionHeader}>
+                <View style={styles.distributionTitleContainer}>
+                  <FontAwesome5 name="chart-pie" size={16} color={Colors.light.secondary} style={styles.distributionIcon} />
+                  <Text style={styles.distributionTitle}>血壓分布</Text>
                 </View>
               </View>
               <View style={styles.distributionList}>
@@ -333,42 +349,7 @@ const styles = StyleSheet.create({
     marginVertical: 16,
   },
   chartCard: {
-    backgroundColor: "#fff",
-    borderRadius: 20,
-    padding: 16,
     marginBottom: 16,
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
-  },
-  cardHeader: {
-    marginBottom: 16,
-  },
-  cardTitleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  cardIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: `${Colors.light.primary}1A`,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  cardTitle: {
-    fontSize: Typography.size.large,
-    fontWeight: Typography.weight.semibold,
-    color: Colors.light.text,
   },
   distributionCard: {
     backgroundColor: "#fff",
@@ -385,6 +366,21 @@ const styles = StyleSheet.create({
         elevation: 4,
       },
     }),
+  },
+  distributionHeader: {
+    marginBottom: 16,
+  },
+  distributionTitleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  distributionIcon: {
+    marginRight: 8,
+  },
+  distributionTitle: {
+    fontSize: Typography.size.large,
+    fontWeight: Typography.weight.semibold,
+    color: Colors.light.text,
   },
   distributionList: {
     gap: 16,
