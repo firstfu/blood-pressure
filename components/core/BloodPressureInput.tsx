@@ -4,6 +4,7 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import { BP_RANGES } from "@/types/bloodPressure";
 import { MotiView } from "moti";
+import { CameraView } from "./CameraView";
 
 interface Props {
   onSave?: (data: { systolic: number; diastolic: number; pulse: number; note: string; category: string }) => void;
@@ -16,6 +17,7 @@ export const BloodPressureInput: React.FC<Props> = ({ onSave, onClose }) => {
   const [pulse, setPulse] = useState("");
   const [note, setNote] = useState("");
   const [category, setCategory] = useState("morning");
+  const [showCamera, setShowCamera] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const categories = [
@@ -67,6 +69,19 @@ export const BloodPressureInput: React.FC<Props> = ({ onSave, onClose }) => {
   };
 
   const status = getStatus();
+
+  const handleRecognized = (data: { systolic: number; diastolic: number; pulse?: number }) => {
+    setSystolic(data.systolic.toString());
+    setDiastolic(data.diastolic.toString());
+    if (data.pulse) {
+      setPulse(data.pulse.toString());
+    }
+    setShowCamera(false);
+  };
+
+  if (showCamera) {
+    return <CameraView onClose={() => setShowCamera(false)} onRecognized={handleRecognized} />;
+  }
 
   return (
     <MotiView style={styles.container} from={{ translateY: 100, opacity: 0 }} animate={{ translateY: 0, opacity: 1 }} transition={{ type: "spring", damping: 15 }}>
@@ -130,6 +145,11 @@ export const BloodPressureInput: React.FC<Props> = ({ onSave, onClose }) => {
           <Text style={styles.unitLabel}>BPM</Text>
         </View>
       </View>
+
+      <Pressable onPress={() => setShowCamera(true)} style={({ pressed }) => [styles.cameraButton, pressed && { opacity: 0.8 }]}>
+        <FontAwesome5 name="camera" size={16} color="#8e8e93" />
+        <Text style={styles.cameraButtonText}>拍照輸入</Text>
+      </Pressable>
 
       {status && (
         <View style={[styles.status, { backgroundColor: `${status.color}15` }]}>
@@ -289,5 +309,19 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
     color: "#fff",
+  },
+  cameraButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 12,
+    marginTop: 16,
+    backgroundColor: "#f5f5f5",
+    borderRadius: 12,
+  },
+  cameraButtonText: {
+    fontSize: 15,
+    color: "#8e8e93",
   },
 });
